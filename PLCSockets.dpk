@@ -1,0 +1,45 @@
+package PLCSockets;
+
+{$R *.res}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'PLC Sockets for Micrologix and SLC 500'}
+{$DESIGNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  vcl;
+
+contains
+  UnitFunctions in 'UnitFunctions.pas',
+  UnitH in 'UnitH.pas',
+  UnitUtil in '..\Projects\TestPLC\UnitUtil.pas',
+  BinDecConv in 'BinDecConv.pas',
+  ConnectThread in 'ConnectThread.pas',
+  FileStrToData in 'FileStrToData.pas',
+  PLCConnectClass in 'PLCConnectClass.pas',
+  PLCLogical in 'PLCLogical.pas',
+  PLCTypedFile in '..\Projects\TestPLC\PLCTypedFile.pas',
+  PLCCIF in '..\Projects\TestPLC\PLCCIF.pas';
+
+end.
