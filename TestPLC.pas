@@ -155,9 +155,9 @@ begin
             for IDX :=0 to ln do
                 MemoOut.Lines.Add(IntToStr(getBit(IDX)))
           else if FType ='T' then
-             MemoOut.Lines.Add(IntToStr(getTimer(IDX)))
+             MemoOut.Lines.Add(IntToStr(getTimer(0)))
           else if FType ='C' then
-             MemoOut.Lines.Add(IntToStr(getCounter(IDX)));
+             MemoOut.Lines.Add(IntToStr(getCounter(0)));
         end;
    end;
 end;
