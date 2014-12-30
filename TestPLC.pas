@@ -60,6 +60,10 @@ type
     PLCTypedFile1: TPLCTypedFile;
     PLCCIF1: TPLCCIF;
     PLCLogical1: TPLCLogical;
+    Edit1: TEdit;
+    Edit2: TEdit;
+    Label3: TLabel;
+    Label9: TLabel;
     procedure UDUnProtMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure UDFileLenMouseUp(Sender: TObject; Button: TMouseButton;
@@ -85,6 +89,8 @@ type
     procedure EdInputExit(Sender: TObject);
     procedure BtnOpenClick(Sender: TObject);
     procedure BtnCloseClick(Sender: TObject);
+    procedure Edit1Change(Sender: TObject);
+    procedure Edit2Change(Sender: TObject);
   private
     { Private declarations }
   public
@@ -398,6 +404,20 @@ procedure TForm1.BtnCloseClick(Sender: TObject);
 begin
   PLCTypedFile1.FileClose;
   EdTag.Text:='';
+end;
+
+procedure TForm1.Edit1Change(Sender: TObject);
+begin
+  PLCLogical1.HostIP:=Edit1.Text;
+  PLCCIF1.HostIP:=Edit1.Text;
+  PLCTypedFile1.HostIP:=Edit1.Text;
+end;
+
+procedure TForm1.Edit2Change(Sender: TObject);
+begin
+  PLCLogical1.PLCIP:=Edit2.Text;
+  PLCCIF1.PLCIP:=Edit2.Text;
+  PLCTypedFile1.PLCIP:=Edit2.Text;
 end;
 
 end.

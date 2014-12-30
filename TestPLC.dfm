@@ -15,7 +15,7 @@ object Form1: TForm1
   TextHeight = 13
   object Label1: TLabel
     Left = 16
-    Top = 336
+    Top = 342
     Width = 43
     Height = 20
     Caption = 'Input'
@@ -28,10 +28,36 @@ object Form1: TForm1
   end
   object Label2: TLabel
     Left = 360
-    Top = 336
+    Top = 342
     Width = 56
     Height = 20
     Caption = 'Output'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 584
+    Top = 399
+    Width = 170
+    Height = 20
+    Caption = 'Computer IP address'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label9: TLabel
+    Left = 584
+    Top = 479
+    Width = 125
+    Height = 20
+    Caption = 'PLC IP address'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -16
@@ -601,6 +627,34 @@ object Form1: TForm1
     ParentFont = False
     TabOrder = 6
     OnClick = BtnWriteProtClick
+  end
+  object Edit1: TEdit
+    Left = 585
+    Top = 424
+    Width = 166
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 7
+    OnChange = Edit1Change
+  end
+  object Edit2: TEdit
+    Left = 585
+    Top = 504
+    Width = 166
+    Height = 24
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 8
+    OnChange = Edit2Change
   end
   object Timer1: TTimer
     Left = 680
