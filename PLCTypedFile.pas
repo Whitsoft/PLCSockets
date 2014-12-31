@@ -27,7 +27,7 @@ type
       fOffset:      Integer;
       fOpen:        Boolean;
       fFileNo:      byte;
-      fFileType:    Integer;
+      fFileType:    byte;
       fFromFile:    PLCFileArray;
       fToFile:      PLCFileArray;
       fFromBit:     PLCFileArray;
@@ -44,13 +44,14 @@ type
   protected
     { Protected declarations }
    // procedure setElement(value: String);
+    function  getFileTypeByte(Ch: Char):Byte;
     procedure SetFileType(Value: TProtFileType);
     procedure ClearArrays;
     procedure setOffset(Val: Integer);
   public
     { Public declarations }
   //  procedure   DisConTimer(Sender: TObject);
-    property    FileTypeProp: integer read fFileType;
+    property    FileTypeProp: byte read fFileType;
     property    Offset: Integer read foffset write setOffset;
     property    FileNo: Byte read fFileNo write fFileNo;
     constructor Create(AOwner: TComponent); override;
@@ -58,7 +59,7 @@ type
     //procedure   setInterval(Value: Cardinal);
     //function    getInterval:Cardinal;
     function    TypedFileWrite(nWords, Offset: word; FType: Char):boolean;
-    function    TypedFileRead(nWords, Offset: word; FType: Char): boolean;
+    function    TypedFileRead(nWords, Offset: word; FileType: Char): boolean;
     function    TypedFileWriteFloat(nWords, Offset: word):boolean;
     function    TypedFileReadFloat(nWords, Offset: word): boolean;
     procedure   PutFile(IDX: Integer; Value: word);
@@ -194,13 +195,43 @@ begin
   result:=fFromTimer[IDX]
 end;
 
-function TPLCTypedFile.TypedFileRead(nWords, Offset: word; FType: Char): boolean;
+function TPLCTypedFile.getFileTypeByte(Ch: Char):Byte;
+begin
+      If Ch = 'S' then
+        result:= FNC_STATUS
+      else if Ch = 'B' then
+        result := FNC_BIT
+      else if Ch = 'T' then
+        result :=  FNC_TIMER
+      else if Ch = 'C' then
+        result := FNC_COUNTER
+      else if Ch = 'R' then
+        result := FNC_CONTROL
+      else if Ch = 'N' then
+        result := FNC_INTEGER
+      else if Ch = 'F' then
+        result := FNC_FLOAT
+      else if Ch = 'O' then
+        result := FNC_OUTPUT
+      else if Ch = 'I' then
+        result := FNC_INPUT
+      else if Ch = 'D' then
+        result := FNC_BCD
+      else if Ch = 'A' then
+        result := FNC_ASCII
+      else
+        result:=0;
+end;
+
+function TPLCTypedFile.TypedFileRead(nWords, Offset: word; FileType: Char): boolean;
 var
   size, HiByte, LoByte: byte;
   I,IDX,Ln: Integer;
   reply: PCCCReply;
 begin
   result:=false;
+
+
   if not PRFileOpen then exit;
   TimeoutEnabled:=false;
 
@@ -214,6 +245,7 @@ begin
       exit;
     end;
   size:=nWords*2;
+  EtherInfo.FType:=getFileTypeByte(FileType);
   reply:=ProtFileRead(EtherInfo,size,offset);
   if reply.Status <> 0 then
     begin
@@ -227,13 +259,13 @@ begin
       begin
         HiByte:=answer[4+IDX*2];
         LoByte:=answer[5+IDX*2];
-        If FType = 'N' then
+        If FileType = 'N' then
           fFromFile[I]:=net2Word(HiByte,LoByte)
-        else if FType = 'B' then
+        else if FileType = 'B' then
           fFromBit[I]:=net2Word(HiByte,LoByte)
-        else if FType = 'T' then
+        else if FileType = 'T' then
            fFromTimer[I]:=net2Word(HiByte,LoByte)
-        else if FType = 'C' then
+        else if FileType = 'C' then
            fFromCounter[I]:= net2Word(HiByte,LoByte);
         inc(I);
       end;

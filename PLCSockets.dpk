@@ -39,7 +39,7 @@ contains
   FileStrToData in 'FileStrToData.pas',
   PLCConnectClass in 'PLCConnectClass.pas',
   PLCLogical in 'PLCLogical.pas',
-  PLCTypedFile in '..\Projects\TestPLC\PLCTypedFile.pas',
-  PLCCIF in '..\Projects\TestPLC\PLCCIF.pas';
+  PLCCIF in '..\Projects\TestPLC\PLCCIF.pas',
+  PLCTypedFile in 'PLCTypedFile.pas';
 
 end.
