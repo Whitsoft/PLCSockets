@@ -1,6 +1,7 @@
 package PLCSockets;
 
 {$R *.res}
+{$R '..\..\Lib\PLCMsg.dcr'}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
@@ -31,15 +32,16 @@ requires
   vcl;
 
 contains
-  UnitFunctions in 'UnitFunctions.pas',
-  UnitH in 'UnitH.pas',
-  UnitUtil in '..\Projects\TestPLC\UnitUtil.pas',
-  BinDecConv in 'BinDecConv.pas',
-  ConnectThread in 'ConnectThread.pas',
-  FileStrToData in 'FileStrToData.pas',
-  PLCConnectClass in 'PLCConnectClass.pas',
-  PLCLogical in 'PLCLogical.pas',
-  PLCCIF in '..\Projects\TestPLC\PLCCIF.pas',
-  PLCTypedFile in 'PLCTypedFile.pas';
+  UnitFunctions in '..\..\Lib\UnitFunctions.pas',
+  UnitH in '..\..\Lib\UnitH.pas',
+  UnitUtil in '..\..\Lib\UnitUtil.pas',
+  BinDecConv in '..\..\Lib\BinDecConv.pas',
+  ConnectThread in '..\..\Lib\ConnectThread.pas',
+  FileStrToData in '..\..\Lib\FileStrToData.pas',
+  PLCConnectClass in '..\..\Lib\PLCConnectClass.pas',
+  PLCLogical in '..\..\Lib\PLCLogical.pas',
+  PLCCIF in 'PLCCIF.pas',
+  PLCTypedFile in '..\..\Lib\PLCTypedFile.pas',
+  PLCMsg in '..\..\Lib\PLCMsg.pas';
 
 end.
