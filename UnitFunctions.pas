@@ -23,7 +23,7 @@ uses
  function  Fill_CS_Data(PLCPtr:PPLC_EtherIP_info;
                       Cmd_Type:Integer;PLCCmd:byte; var EthIPLen: Integer):Integer;
 
-
+// function  PLCListen(PLCPtr: PPLC_EtherIP_info; SocketInfo:PMsgSocketInfo): String;
  function  PLCConnect(PLCPtr: PPLC_EtherIP_info): String;
  function  senddata(buff: Pdata_buffer; ASocket: Integer):Integer;
  function  establish_connection(PLCPtr: PPLC_EtherIP_info; var error: string):Integer;
@@ -36,10 +36,12 @@ uses
                         Address:String; var EthIPLen: Integer):Integer;
                         
  function  fillBuffer(PLCPtr: PPLC_EtherIP_info; var aBuffer:array of byte;DtLen: Integer): Integer; //len
+ function  getCommand(rBuffer: array of byte): word;
  function  emptyBuffer(PLCPtr: PPLC_EtherIP_info; var rBuffer:array of byte): PCCCReply;
  function  register_session(PLCPtr:PPLC_EtherIP_info):Integer;
  function  unregister_session(PLCPtr:PPLC_EtherIP_info): Integer;
  procedure RandContext(Plc:PPLC_EtherIP_info);
+ function  RandID:conID;
  function  ProtFileOpen(PLCPtr:PPLC_EtherIP_info;FileNo: word;FileType: byte):PCCCReply;
  function  ProtFileClose(PLCPtr:PPLC_EtherIP_info):PCCCReply;
  function  ProtFileRead(PLCPtr:PPLC_EtherIP_info; size: byte;fOffset: word):PCCCReply;
@@ -109,6 +111,18 @@ begin
   Plc^.EIP_context[6]:=I2 and $0F00;
   Plc^.EIP_context[7]:=I2 and $F000;
 end;
+
+function RandID:conID;
+var
+  I1: Integer;
+begin
+  I1:=trunc(Random(65536));
+  result[0]:=I1 and $000F;
+  result[1]:=I1 and $00F0;
+  result[2]:=I1 and $0F00;
+  result[3]:=I1 and $F000;
+end;
+
 
 function examineError(Err: Integer): String;
 begin
@@ -203,7 +217,7 @@ begin
   PLCPtr^.sock_handle := socket(AF_INET, SOCK_STREAM, 0);
   if (PLCPtr^.sock_handle = -1) then
     begin
-      ShowMessage('attach_socket error');
+      //ShowMessage('attach_socket error');
     	error:=NOCONNECT;
       exit;
     end;
@@ -814,6 +828,8 @@ begin
     result:=Session;
 end;
 
+
+
 //*************************************************
 // Get a session handle from the PLC
 //*************************************************
@@ -975,6 +991,7 @@ begin
       result:= DataLen;
     end;
 end;
+
 
 
 function PLCConnect(PLCPtr: PPLC_EtherIP_info): String;
@@ -1343,6 +1360,15 @@ begin
    end;    
 end;
  }
+
+function getCommand(rBuffer: array of byte): word;
+var
+  IDX: Integer;
+  PHead: EtherIP_Hdr;
+begin
+  IDX:=ByteArrayToStruct(@PHead,rBuffer,24,0);
+  result:=rBuffer[1]*256+rBuffer[0];
+end;
 //************************************************************
 // Record errors here
 //************************************************************
@@ -1359,7 +1385,7 @@ begin
   result.Error:=0;
   bzero(@AItem.ItemData,16);
   // Extract encapsulation header
-  IDX:=ByteArrayToStruct(@PHead,rBuffer,24,0);
+  IDX:=ByteArrayToStruct(@PHead,rBuffer,24,0); //Cmd through options
 
 
   // Extract Encapsulation data.Handle & data.TimeOut

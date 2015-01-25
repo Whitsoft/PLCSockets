@@ -11,7 +11,8 @@ uses
   PLCLogical in 'PLCLogical.pas',
   PLCCIF in 'PLCCIF',
   UnitH in 'UnitH.pas',
-  PLCConnectClass in 'PLCConnectClass.pas';
+  PLCConnectClass in 'PLCConnectClass.pas',
+  PLCMsg in 'PLCMsg.pas';
 
 {$R *.res}
 

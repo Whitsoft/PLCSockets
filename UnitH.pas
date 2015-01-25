@@ -3,8 +3,11 @@ unit UnitH;
 interface
 uses
 
-  Windows, Classes, WinSock;
+Windows, Classes, WinSock;
+
 const
+   PREFIX: array[0..15] of String = (' ', ' ', ' ', ' ', 'S',
+          'B', 'T', 'C', 'R','N', 'F' ,'O', 'I', 'ST', 'A', 'D');
    MAXWORDS=24;
    MAXFILEARRAY = 120;
    MAXOFFSET=64;
@@ -57,6 +60,7 @@ const
   FNC_ASCII   = $8E;
   FNC_BCD     = $8F;
 
+
   ETHERNET = 1;
   CIPADDLEN = 15;
   CIPDATALEN=94;
@@ -81,10 +85,11 @@ const
   List_Interfaces = $64;
   PLC_Register_Session = $65;
   PLC_UnRegister_Session = $66;
-  EIP_SendRRData = $6f;
+  EIP_SendRRData = $6F;
   SendUnitData = $70;
   ETHIP_Header_Length = 24;
   DATA_MINLEN = 16;
+  FwdOpen_Resp = $D4;
 
   //*****************************************
   // PCCC commands
@@ -142,6 +147,10 @@ const PLCErrors: array[0..15] of String = ('Success',
       '?','?','?');
 
 
+
+type
+  TBytes = array[0..3] of byte;
+
 type
   PSimpleBuf = ^SimpleBuf;
   SimpleBuf = record
@@ -188,21 +197,147 @@ type
      overall_len: word;
 end;
 
+{struct sockaddr_in
+        short   sin_family;
+        u_short sin_port;
+        struct  in_addr sin_addr;
+        char    sin_zero[8];
+;}
 //***********************************************************
 // Ethernet/IP Encapsulation header - same for all commands *
 //***********************************************************
-type
-  PEtherIP_Hdr = ^EtherIP_Hdr;
+ PEtherIP_Hdr = ^EtherIP_Hdr;
   EtherIP_Hdr = packed record
     EIP_Command: word;
     CIP_Len: word;
     session_handle: cardinal;
     EIP_status: cardinal;
     context: array[0..7] of byte;
-    Options: cardinal;
+    case Opt: boolean of
+      true:  (Options: cardinal);
+      false: (ProtoVersion:word;OptionFlags:word);
+end;
+
+//***********************************************************
+// Forward Open parameters                                  *
+//***********************************************************
+ PFwdOpenParr = ^FwdOpenPar;
+  FwdOpenPar = packed record
+    OT_ConID: array[0..3] of byte;
+    TO_ConID: array[0..3] of byte;
+    OT_RPI:   array[0..3] of byte;
+    TO_RPI:   array[0..3] of byte;
+    ConnectSN:word;
 end;
 
 type
+  PData500 = ^Data500;
+  Data500 = record
+  CmdSpecificHdr: array[0..8] of byte;
+  SeqNo: word;
+  Cmd: byte;
+  NumBytes: Byte;
+  FileNo: byte;
+  FileType: byte;
+  case FileData: integer of
+    1: (floats: array[0..63] of dword);
+    2: (words: array[0..127] of word);
+    3: (bytes: array[0..255] of byte);
+end;
+
+type
+  PCPF = ^CPF;   //for Slc500 message
+  CPF = record
+    Header:EtherIP_Hdr;
+    IFaceHandle: dword;
+    TimeOut: word;
+    ItemCnt: word;
+    AddrType: word;
+    AddrLn: word;
+    ConnectID: dword;
+    DataType: word;
+    DataLn: word;
+    SeqCnt: word;
+    CIPService: byte;
+    ReqPathSize: byte;
+    ReqPath: dword;
+    DataSlc500: Data500;
+end;
+
+type
+  PFwdOpenHdr = ^FwdOpenHdr;   //for Slc500 message
+  FwdOpenHdr = packed record
+    //Header:EtherIP_Hdr;
+    IFaceHandle: dword;
+    TimeOut: word;
+    ItemCnt: word;
+    AddrType: word;
+    AddrLn: word;
+    DataType: word;
+    DataLn: word;
+    CIPService: byte;
+    ReqPathSize: byte;
+    ReqPath: dword;
+end;
+
+type
+  conID = array[0..3] of byte;
+
+type
+  PFwdOpenReq = ^FwdOpenReq;   //for Slc500 message
+  FwdOpenReq = packed record
+    Priority: byte;
+    TOTicks: byte;
+    OTConID: conID;
+    TOConID: conID;
+    ConSN: word;
+    VendID: word;
+    OriginSN: dword;
+    Reserve0: byte;
+    Reserve1: byte;
+    Reserv2: byte;
+    OT_RPI: conID;
+    OT_ConParams: word;
+    TO_RPI: conID;
+    TO_ConParams: word;
+    TransTrigger: byte;
+    ConPathSize: byte;
+    MsgRoutPath: dword;
+end;
+
+type
+  PFwdOpenResp = ^FwdOpenResp;   //for Slc500 message
+  FwdOpenResp = packed record
+    unknown: word;
+    OTConID: conID;
+    TOConID: conID;
+    ConSN: word;
+    VendID: word;
+    OriginSN: dword;
+    OT_API: conID;
+    TO_API: conID;
+    TO_ConParams: word;
+    reply: byte;
+    reserved: byte;
+end;
+
+type
+  PFwdOpenRequest = ^PFwdOpenRequest;
+  FwdOpenRequest = record
+    IPHeader: EtherIP_Hdr;
+    OpenHdr:FwdOpenHdr;
+    OpenReq: FwdOpenReq;
+end;
+
+type
+  PFwdOpenResponse = ^PFwdOpenResponse;
+  FwdOpenResponse = record
+    IPHeader: EtherIP_Hdr;
+    OpenHdr:FwdOpenHdr;
+    OpenRes: FwdOpenResp;
+end;
+
+type
   PAddress_Item=^Address_Item;
   Address_Item = packed record
     CSItemType_ID: word;  //Init to CPH_Null = $0000
@@ -210,6 +345,21 @@ type
     ItemData: array[0..CIPADDLEN] of byte;
 end;
 
+type
+  PCSD=^CSD; //command specific data
+  CSD = packed record
+    CMD: byte;
+    Status: byte;
+    TNS: word;
+    func: byte;
+    Size: byte;
+    FileNo: byte;
+    FileType: Byte;
+    Element: byte;
+    SubElement: byte;
+    CSDData:array[0..CIPDATALEN] of byte;
+end;
+    
 type
   PData_Item=^Data_Item;
   Data_Item = packed record
@@ -239,6 +389,26 @@ type PtrCIP = ^CIP;
     ItemCnt: word;
     PAddress: Address_Item;
     PData: Data_Item;
+end;
+
+{struct sockaddr_in {
+        short   sin_family;
+        u_short sin_port;
+        struct  in_addr sin_addr;
+        char    sin_zero[8];
+}
+
+type
+  PMsgSocketInfo = ^MsgSocketInfo;
+  MsgSocketInfo = packed record
+    SockHandle: Integer;
+    PCPort:     word;
+    PLCPort:    word;
+    SockAddr:   TSockAddrIn;
+    SockError:  Integer;
+    PCIP:       String;
+    PLCIP:      String;
+    tag:        Byte;
 end;
 
 type  //Keep this data for individual PLC connections
