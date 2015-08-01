@@ -93,7 +93,7 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('Samples', [TPLCConnectClass]);
+  RegisterComponents('PLCSockets', [TPLCConnectClass]);
 end;
 
 function TPLCConnectClass.getHostInfo: String;

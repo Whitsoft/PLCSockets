@@ -76,7 +76,7 @@ implementation
        {$R TPLCMSG.dcr}
 procedure Register;
 begin
-  RegisterComponents('Samples', [TPLCMSG]);
+  RegisterComponents('PLCSockets', [TPLCMSG]);
 end;
 
 constructor TPLCMsg.Create(AOwner: TComponent);
