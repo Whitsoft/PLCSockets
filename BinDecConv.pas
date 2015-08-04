@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes,
-  Dialogs, StdCtrls, math, StrUtils, UnitH;
+  Dialogs, StdCtrls, math, StrUtils, UnitH, types,UnitUtil;
 
 
 type
@@ -22,6 +22,9 @@ type
 
 type
   binBuf=array[0..31] of char;
+
+type
+  binFloatBuf=array[0..3] of byte;
 
 function charToHexValue(S: char): Integer;
 function RightOfDec(S: String): String;
@@ -43,6 +46,7 @@ function toByte(S: ByteStr): Byte;
 
 function FloatToBinary(Val: Single):FloatRecord;
 function binaryToFloat(FRec: FloatRecord): Single;
+function bufToFloatRecord(b0,b1,b2,b3: byte): floatRecord;
 
 implementation
 
@@ -386,6 +390,25 @@ begin
   SignBit:= StrToInt('$'+HexStr) and StrToInt('$80000000');
     if SignBit >0 then Sign:=-1 else Sign:=1;
   result:=calcSingle(Sign,Exponent,Mantissa);
+end;
+
+function bufToFloatRecord(b0,b1,b2,b3: byte): floatRecord;
+var
+  IDX: Integer;
+  HiByte, LoByte: byte;
+  LoWord, HiWord: Word;
+begin
+   for IDX := 0 to 3 do
+      begin
+        HiByte:=b0;
+        LoByte:=b1;
+        LoWord:=net2Word(HiByte,LoByte);
+        HiByte:=b2;
+        LoByte:=b3;
+        HiWord:=net2Word(HiByte,LoByte);
+        result.LoWord:=LoWord;
+        result.HiWord:=HiWord;
+      end;
 end;
 
 end.

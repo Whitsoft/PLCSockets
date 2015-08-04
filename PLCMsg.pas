@@ -38,6 +38,7 @@ type
      Element: byte;
      SubElement: Byte;
      Data: array[0..63] of byte;
+     FileDesc: String;
 end;
 
 type
@@ -100,13 +101,19 @@ begin
 
   for IDX := 0 to ConList.Count -1 do
     if assigned(ConList.Objects[IDX]) then
-      dispose(PPLCMessage(ConList.Objects[IDX]));
+      dispose(PConID(ConList.Objects[IDX]));
 
   PLCList.Free;
   ConList.Free;
   inherited Destroy;
 end;
 
+// ***********************************************************
+// Read a buffer of data from PLC into buffer
+// Buffer starts at Industrial Protocol (Ethernet/IP)
+// First item is encapsulation header
+// Respond to PLC by sending OBuf
+// ***********************************************************
 procedure TPLCMsg.ClientRead(Sender: TObject;Socket: TCustomWinSocket);
 var
   buffer: array[0..255] of byte;
@@ -118,12 +125,12 @@ var
 begin
   S:='';
   for cnt := 0 to 255  do
-  buffer[cnt]:=0;
+    buffer[cnt]:=0;
   cnt:=255;
   bytes:=Socket.ReceiveBuf(buffer,cnt);
   for cnt:=0 to bytes-1 do
     S:=S+ByteToHex(buffer[cnt]);
-  if buffer[0] = PLC_Register_Session then   //Register Session
+  if buffer[0] = PLC_Register_Session then   //Register Session     $65
     begin
       SessionHandle:=sessionHandle+1;
       Cardinal2ByteArray(SessionHandle,session);
@@ -133,7 +140,7 @@ begin
       Buffer[7]:=Session[3];
       Socket.SendBuf(Buffer,28);
     end
-  else if buffer[0] = EIP_SendRRData then   //open forward
+  else if buffer[0] = EIP_SendRRData then   //open forward   $6F
     begin
       for IDX := 0 to 3 do
         Arr[IDX]:=buffer[IDX+12];
@@ -177,37 +184,39 @@ begin
         OBuf[IDX] := Buffer[IDX+10];
       Socket.SendBuf(OBuf,70);
     end
-  else if buffer[0] = SendUnitData then   //CIP message
+  else if buffer[0] = SendUnitData then   //CIP message  $70
     begin
        Cnt:=buffer[42];
       //String = PLC IP Address+space+FileType+FileNo+':'+Element+'/'+SubElement
       //Identifies a unique element in a unique PLC
-
+      // Buffer[12] starts 8 byte Sender Context - for Allen Bradley
+      //   this is 4 byte IP Address +
       S:=IntToStr(Buffer[12])+'.'+ IntToStr(Buffer[13])+'.' +
-         IntToStr(Buffer[14])+'.'+IntToStr(Buffer[15]);
-      S:=S+' '+PREFIX[buffer[66]-128]+ IntToStr(buffer[65])+':' +
-                        intToStr(buffer[67])+'/'+intToStr(buffer[68]);
-
+         IntToStr(Buffer[14])+'.'+IntToStr(Buffer[15]);     //PLC IP Address
+      //buffer[66] is encoded prefix 'N','B','F','C',etc
+      S:=S+' '+PREFIX[buffer[66]-128]+ IntToStr(buffer[65])+':' +  //File number + ':'
+                        intToStr(buffer[67])+'/'+intToStr(buffer[68]); // Element no + '/' + sub Element no.
       DEX:=PLCList.IndexOf(S);
       if DEX < 0 then
-         begin
+         begin  //Keep a list of PLC objects
            PLCList.AddObject(S,TObject(new(PPLCMessage)));
            DEX:=PLCList.IndexOf(S);
          end;
       with PPLCMessage(pointer(PLCList.Objects[DEX]))^ do
         begin
-          SHandle[0]:=buffer[4];
+          SHandle[0]:=buffer[4]; //Record 4 byte session handle
           SHandle[1]:=buffer[5];
           SHandle[2]:=buffer[6];
           SHandle[3]:=buffer[7];
+          FileDesc:=S;
           Cmd:=buffer[60];
-          funct:=buffer[63];
-          Size:=buffer[64];
-          FileNo:=buffer[65];
-          FileType:=buffer[66];
-          Element:=buffer[67];
-          SubElement:=buffer[68];
-          for IDX:=69 to (44+Cnt) do
+          funct:=buffer[63];       // Perhaps 0xAA Protected logical write 3 address fields
+          Size:=buffer[64];        // Perhaps 8 bytes
+          FileNo:=buffer[65];      // 8 for F8 for instance
+          FileType:=buffer[66];    // Perhaps F for FileType F
+          Element:=buffer[67];     // File Element number
+          SubElement:=buffer[68];  // File sub Element    Ex: of all of this F8:7/0
+          for IDX:=69 to (44+Cnt) do   //This is the value sent by the PLC - must interpret it
             Data[IDX-69] := buffer[IDX];
         end;    
       for IDX := 0 to 50 do
@@ -220,7 +229,7 @@ begin
       OBuf[47]:=0;
       OBuf[48]:=0;
       OBuf[49]:=0;
-      OBuf[4]:=buffer[4];
+      OBuf[4]:=buffer[4];  //4 byte session handle
       OBuf[5]:=buffer[5];
       OBuf[6]:=buffer[6];
       OBuf[7]:=buffer[7];

@@ -9,7 +9,7 @@ uses
   UnitFunctions in 'UnitFunctions.pas',
   PLCTypedFile in 'PLCTypedFile.pas',
   PLCLogical in 'PLCLogical.pas',
-  PLCCIF in 'PLCCIF',
+  PLCCIF in 'PLCCIF.pas',
   UnitH in 'UnitH.pas',
   PLCConnectClass in 'PLCConnectClass.pas',
   PLCMsg in 'PLCMsg.pas';

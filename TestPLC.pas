@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, PLCLogical, PLCConnectClass,
-  PLCCIF, PLCTypedFile, ExtCtrls;
+  PLCCIF, PLCTypedFile, ExtCtrls, ScktComp, PLCMsg, BinDecConv, UnitH;
 
 type
   TForm1 = class(TForm)
@@ -64,6 +64,9 @@ type
     Edit2: TEdit;
     Label3: TLabel;
     Label9: TLabel;
+    PLCMsg1: TPLCMsg;
+    EdRec: TEdit;
+    EdVal: TEdit;
     procedure UDUnProtMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure UDFileLenMouseUp(Sender: TObject; Button: TMouseButton;
@@ -91,6 +94,7 @@ type
     procedure BtnCloseClick(Sender: TObject);
     procedure Edit1Change(Sender: TObject);
     procedure Edit2Change(Sender: TObject);
+    procedure PLCMsg1ClientRead(Sender: TObject; Socket: TCustomWinSocket);
   private
     { Private declarations }
   public
@@ -418,6 +422,33 @@ begin
   PLCLogical1.PLCIP:=Edit2.Text;
   PLCCIF1.PLCIP:=Edit2.Text;
   PLCTypedFile1.PLCIP:=Edit2.Text;
+end;
+
+procedure TForm1.PLCMsg1ClientRead(Sender: TObject;
+  Socket: TCustomWinSocket);
+var
+  DataSize, DataCmd,DataFileNo,DataFileType,DataElement,DataSubElem, DataFunct: Byte;
+  DataFileDesc: String;
+  FR: FloatRecord;
+  Val: Single;
+begin
+  PLCMsg1.ClientRead(Sender,Socket);
+  if PLCMsg1.PLCList.Count <= 0 then exit;
+  With  PPLCMessage(pointer(PLCMsg1.PLCList.Objects[0]))^ do
+    begin
+      DataSize:= Size;
+      DataFileDesc:=FileDesc;
+      DataCmd:=Cmd;
+      DataFunct:=funct;
+      DataFileNo:=FileNo;
+      DataFileType:=FileType;
+      DataElement:=Element;
+      DataSubElem:=SubElement;
+      FR:=bufToFloatRecord(Data[0],Data[1],Data[2],Data[3]);
+      Val:=binaryToFloat(FR);
+      EdVal.Text:=formatFloat('0.000',Val);
+    end;
+  EdRec.Text:=DataFileDesc;
 end;
 
 end.
