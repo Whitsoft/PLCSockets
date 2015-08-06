@@ -1,9 +1,9 @@
 object Form1: TForm1
   Left = 205
   Top = 133
-  Width = 1215
-  Height = 853
-  Caption = 'TestPLC'
+  Width = 1159
+  Height = 812
+  Caption = 'TEst Program for Micro Logix - may work for SLC 500'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,10 +15,10 @@ object Form1: TForm1
   TextHeight = 16
   object Label1: TLabel
     Left = 20
-    Top = 421
-    Width = 47
+    Top = 424
+    Width = 132
     Height = 24
-    Caption = 'Input'
+    Caption = 'Values to PLC'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -20
@@ -28,10 +28,10 @@ object Form1: TForm1
   end
   object Label2: TLabel
     Left = 443
-    Top = 421
-    Width = 63
+    Top = 424
+    Width = 156
     Height = 24
-    Caption = 'Output'
+    Caption = 'Values from PLC'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -20
@@ -61,6 +61,71 @@ object Form1: TForm1
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -20
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label10: TLabel
+    Left = 831
+    Top = 63
+    Width = 141
+    Height = 20
+    Caption = 'IP and file of PLC'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label11: TLabel
+    Left = 836
+    Top = 135
+    Width = 125
+    Height = 20
+    Caption = 'MSG from PLC '
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -17
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label12: TLabel
+    Left = 948
+    Top = 497
+    Width = 146
+    Height = 16
+    Caption = 'Default   198.168.1.10'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -14
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label13: TLabel
+    Left = 950
+    Top = 596
+    Width = 154
+    Height = 16
+    Caption = 'Must be same network'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -14
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label14: TLabel
+    Left = 950
+    Top = 614
+    Width = 89
+    Height = 16
+    Caption = 'As Computer'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -14
     Font.Name = 'MS Sans Serif'
     Font.Style = [fsBold]
     ParentFont = False
@@ -239,36 +304,6 @@ object Form1: TForm1
         'R6  - CONTROL'
         'S2  - STATUS')
     end
-    object BtnPutFile: TButton
-      Left = 177
-      Top = 167
-      Width = 93
-      Height = 31
-      Caption = 'Put File'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 7
-      OnClick = BtnPutFileClick
-    end
-    object BtnGetFile: TButton
-      Left = 177
-      Top = 212
-      Width = 93
-      Height = 30
-      Caption = 'Get File'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 8
-      OnClick = BtnGetFileClick
-    end
     object EdTag: TEdit
       Left = 188
       Top = 336
@@ -276,7 +311,7 @@ object Form1: TForm1
       Height = 28
       Color = 12372936
       ReadOnly = True
-      TabOrder = 9
+      TabOrder = 7
     end
   end
   object GroupBox2: TGroupBox
@@ -377,24 +412,9 @@ object Form1: TForm1
       TabOrder = 1
       OnMouseUp = UDUnProtMouseUp
     end
-    object BtnGetUnProt: TButton
-      Left = 20
-      Top = 300
-      Width = 92
-      Height = 31
-      Caption = 'Get Data '
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 2
-      OnClick = BtnGetUnProtClick
-    end
     object BtnUnProtRead: TButton
-      Left = 151
-      Top = 118
+      Left = 20
+      Top = 246
       Width = 93
       Height = 31
       Caption = 'Read'
@@ -404,12 +424,12 @@ object Form1: TForm1
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 3
+      TabOrder = 2
       OnClick = BtnUnProtReadClick
     end
     object BtnUnProtWrite: TButton
-      Left = 151
-      Top = 167
+      Left = 20
+      Top = 289
       Width = 93
       Height = 31
       Caption = 'Write'
@@ -419,30 +439,15 @@ object Form1: TForm1
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 4
+      TabOrder = 3
       OnClick = BtnUnProtWriteClick
-    end
-    object BtnPutUnProt: TButton
-      Left = 20
-      Top = 256
-      Width = 92
-      Height = 31
-      Caption = 'Put Data'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 5
-      OnClick = BtnPutUnProtClick
     end
     object EdUnProt: TEdit
       Left = 20
       Top = 121
       Width = 70
       Height = 28
-      TabOrder = 6
+      TabOrder = 4
       Text = '0'
     end
     object UpDown1: TUpDown
@@ -452,12 +457,12 @@ object Form1: TForm1
       Height = 31
       Max = 16
       Position = 1
-      TabOrder = 7
+      TabOrder = 5
       OnMouseUp = UpDown1MouseUp
     end
   end
   object GroupBox4: TGroupBox
-    Left = 20
+    Left = 22
     Top = 21
     Width = 197
     Height = 385
@@ -484,23 +489,10 @@ object Form1: TForm1
     end
     object Label16: TLabel
       Left = 14
-      Top = 106
-      Width = 87
-      Height = 16
-      Caption = 'Len in words'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Label28: TLabel
-      Left = 14
       Top = 126
-      Width = 110
+      Width = 140
       Height = 16
-      Caption = 'To read or write'
+      Caption = 'Len in words to read'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -15
@@ -526,36 +518,6 @@ object Form1: TForm1
       TabOrder = 1
       Text = '1'
     end
-    object BtnPutData: TButton
-      Left = 14
-      Top = 271
-      Width = 92
-      Height = 31
-      Caption = 'Put Data'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 2
-      OnClick = BtnPutDataClick
-    end
-    object BtnGetData: TButton
-      Left = 14
-      Top = 308
-      Width = 92
-      Height = 30
-      Caption = 'Get Data'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -15
-      Font.Name = 'MS Sans Serif'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 3
-      OnClick = BtnGetDataClick
-    end
     object UpDown3: TUpDown
       Left = 132
       Top = 148
@@ -564,12 +526,12 @@ object Form1: TForm1
       Min = 1
       Max = 16
       Position = 1
-      TabOrder = 4
+      TabOrder = 2
       OnMouseUp = UpDown3MouseUp
     end
     object BtnLogRead: TButton
       Left = 14
-      Top = 197
+      Top = 213
       Width = 92
       Height = 31
       Caption = 'Read'
@@ -579,12 +541,12 @@ object Form1: TForm1
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 5
+      TabOrder = 3
       OnClick = BtnLogReadClick
     end
     object BtnLogWrite: TButton
       Left = 14
-      Top = 234
+      Top = 256
       Width = 92
       Height = 31
       Caption = 'Write'
@@ -594,7 +556,7 @@ object Form1: TForm1
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
-      TabOrder = 6
+      TabOrder = 4
       OnClick = BtnLogWriteClick
     end
   end
@@ -657,15 +619,15 @@ object Form1: TForm1
     OnChange = Edit2Change
   end
   object EdRec: TEdit
-    Left = 888
-    Top = 112
+    Left = 835
+    Top = 86
     Width = 225
     Height = 24
     TabOrder = 9
   end
   object EdVal: TEdit
-    Left = 888
-    Top = 144
+    Left = 835
+    Top = 158
     Width = 225
     Height = 24
     TabOrder = 10
@@ -679,24 +641,24 @@ object Form1: TForm1
     PLCIP = '192.168.1.50'
     PLCPort = 44818
     Timeout = 5000
-    Left = 523
-    Top = 49
+    Left = 763
+    Top = 41
   end
   object PLCCIF1: TPLCCIF
     HostIP = '192.168.1.10'
     PLCIP = '192.168.1.50'
     PLCPort = 44818
     Timeout = 5000
-    Left = 357
-    Top = 33
+    Left = 453
+    Top = 41
   end
   object PLCLogical1: TPLCLogical
     HostIP = '192.168.1.10'
     PLCIP = '192.168.1.50'
     PLCPort = 44818
     Timeout = 5000
-    Left = 136
-    Top = 289
+    Left = 176
+    Top = 41
   end
   object PLCMsg1: TPLCMsg
     Active = True
@@ -704,7 +666,7 @@ object Form1: TForm1
     ServerType = stNonBlocking
     OnClientRead = PLCMsg1ClientRead
     LocalIP = '192.168.1.10'
-    Left = 920
-    Top = 72
+    Left = 840
+    Top = 32
   end
 end
