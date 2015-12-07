@@ -3,13 +3,14 @@ unit ConnectThread;
 interface
 
 uses
-  Classes, Windows,WinSock, unitH, unitUtil, dialogs;
+  Classes, Windows,WinSock, unitH, unitUtil, sysUtils, dialogs;
 
 type
   TConnectThread = class(TThread)
   private
     fPLCPtr: PPLC_EtherIP_info;
     procedure Terminated(Sender: TObject);
+    procedure TestPrint(TmpStr: String);
   public
     constructor create(CreateSuspended: Boolean; aPLCPtr: PPLC_EtherIP_info);
     procedure  Execute();override;
@@ -117,6 +118,7 @@ begin
 
                  custom.version := htons(PCCC_VERSION);
                  custom.backlog := htons(PCCC_BACKLOG);
+                // testPrint(INtTOStr(custom.version+' '+IntToStr(custom.backlog);
                  StructToByteArray(header.custom,Addr(custom),_CUSTOM_LEN,0);
                  //psh/ack - psh/ack computer - plc
                  send(PLCPtr^.sock_handle, header, _ENET_HEADER_LEN,0);
@@ -138,4 +140,20 @@ begin
   end;
 end;
 
+procedure TConnectThread.TestPrint(TmpStr: String);
+{Used primarily for debugging}
+var
+  F1:  TextFile;
+  FName: String;
+begin
+    FName:='C:\Test.LOG';
+    AssignFile(F1,FName);
+    {$I-}
+    Append(F1);
+    {$I+}
+    if IOResult <>0  then  {File did not exist}
+       Rewrite(F1);
+    WriteLn(F1,TmpStr+' '+DateTimeToStr(Now));
+    CloseFile(F1);
+  end;
 end.
