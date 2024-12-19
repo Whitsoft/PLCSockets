@@ -190,7 +190,7 @@ type
 var
   phe: PHostEnt;
   pptr: PaPInAddr;
-  Buffer: array[0..63] of CHAR;
+  Buffer: array[0..63] of AnsiChar;
   I: Integer;
   GInitData: TWSAData;
 begin
@@ -214,7 +214,8 @@ end;
 
 
 
-function TPLCConnectClass.Connect:String;
+
+function TPLCConnectClass.Connect:String;
 begin
   if Connected then exit;
   Init;

@@ -36,12 +36,10 @@ const
    MICRO = 4;
    CTRUE = 0;
    CFALSE = 1;
-
   _ENET_HEADER_LEN = 28;
   _CUSTOM_LEN = 16;
   PCCC_VERSION = 4;
   PCCC_BACKLOG = 5;
-
  // Use one of the these values for the fnc, prot logical. Do not use any other
  // values; doing so may result in unpredictable results.
  //**********************************************
@@ -78,8 +76,9 @@ const
   WINSOCKERROR = -4;
 
 
-  NOP = 0;
-  List_Targets = 1;
+  NOP = 0;
+
+  List_Targets = 1;
   List_Services = 4;
   ListIdentity = $63;
   List_Interfaces = $64;
@@ -88,15 +87,16 @@ const
   EIP_SendRRData = $6F;
   SendUnitData = $70;
   ETHIP_Header_Length = 24;
-  DATA_MINLEN = 16;
-  FwdOpen_Resp = $D4;
+  DATA_MINLEN = 16;
+  FwdOpen_Resp = $D4;
 
-  //*****************************************
-  // PCCC commands
-  //*****************************************
-  CLOSE_CMD  = $0F;
-  CLOSE_FNC  = $82;
-  OPEN_CMD   = $0F;
+
+  //*****************************************
+  // PCCC commands
+  //*****************************************
+  CLOSE_CMD  = $0F;
+  CLOSE_FNC  = $82;
+  OPEN_CMD   = $0F;
   OPEN_FNC   = $81;
   STATUS_FNC = $03;
   PWRITE_CMD = $0F;
@@ -107,21 +107,20 @@ const
   UREAD_CMD  = $01;
   UWRITE_ANS = $48;
   UREAD_ANS  = $41;
-
   PWRITE_FNC = $AA;
   PREAD_FNC  = $A2;
   PREAD_FILE_FNC = $A7;
-  PWRITE_FILE_FNC = $AF;
+  PWRITE_FILE_FNC = $AF;
 
-const CIPErrors: array[0..9] of String = ('None',
-      'No Session Match',
-      'No Context Match',
-      'No Address Match',
-      '?','?','?','?','?',
-      'CIP status error');
+const CIPErrors: array[0..9] of String = ('None',
+      'No Session Match',
+      'No Context Match',
+      'No Address Match',
+      '?','?','?','?','?',
+      'CIP status error');
 
-const PCErrors: array[0..15] of String = ('Success',
-      'PLC node out of buffer space',
+const PCErrors: array[0..15] of String = ('Success',
+      'PLC node out of buffer space',
       'PLC node does not ACK',
       'Duplicate token holder',
       'PLC port disconnected',
@@ -146,12 +145,10 @@ const PLCErrors: array[0..15] of String = ('Success',
       'Waiting for ACK',
       '?','?','?');
 
-
-
-type
+type
   TBytes = array[0..3] of byte;
 
-type
+type
   PSimpleBuf = ^SimpleBuf;
   SimpleBuf = record
     Cnt: Integer;
@@ -166,15 +163,17 @@ type
 
 type
   PLCFileArray = array [0..MAXWORDS-1] of word;
+
 type
   PLCFloatArray = array [0..MAXWORDS-1] of FloatRecord;
 type
   PLCTimerArray = array[0..2] of word;
+
 type
   PLCCounterArray = array[0..2] of word;
+
 type
   FileArray = array[0..MAXFILEARRAY] of word;
-
 
 type
   PServices = ^ _services;
@@ -196,7 +195,6 @@ type
      len: word;
      overall_len: word;
 end;
-
 {struct sockaddr_in
         short   sin_family;
         u_short sin_port;
@@ -217,7 +215,6 @@ end;
       true:  (Options: cardinal);
       false: (ProtoVersion:word;OptionFlags:word);
 end;
-
 //***********************************************************
 // Forward Open parameters                                  *
 //***********************************************************
@@ -247,97 +244,97 @@ end;
 
 type
   PCPF = ^CPF;   //for Slc500 message
-  CPF = record
-    Header:EtherIP_Hdr;
-    IFaceHandle: dword;
-    TimeOut: word;
-    ItemCnt: word;
-    AddrType: word;
-    AddrLn: word;
-    ConnectID: dword;
-    DataType: word;
-    DataLn: word;
-    SeqCnt: word;
-    CIPService: byte;
-    ReqPathSize: byte;
-    ReqPath: dword;
-    DataSlc500: Data500;
-end;
+  CPF = record
+    Header:EtherIP_Hdr;
+    IFaceHandle: dword;
+    TimeOut: word;
+    ItemCnt: word;
+    AddrType: word;
+    AddrLn: word;
+    ConnectID: dword;
+    DataType: word;
+    DataLn: word;
+    SeqCnt: word;
+    CIPService: byte;
+    ReqPathSize: byte;
+    ReqPath: dword;
+    DataSlc500: Data500;
+end;
 
 type
   PFwdOpenHdr = ^FwdOpenHdr;   //for Slc500 message
-  FwdOpenHdr = packed record
-    //Header:EtherIP_Hdr;
-    IFaceHandle: dword;
-    TimeOut: word;
-    ItemCnt: word;
-    AddrType: word;
-    AddrLn: word;
-    DataType: word;
-    DataLn: word;
-    CIPService: byte;
-    ReqPathSize: byte;
-    ReqPath: dword;
-end;
+  FwdOpenHdr = packed record
+    //Header:EtherIP_Hdr;
+    IFaceHandle: dword;
+    TimeOut: word;
+    ItemCnt: word;
+    AddrType: word;
+    AddrLn: word;
+    DataType: word;
+    DataLn: word;
+    CIPService: byte;
+    ReqPathSize: byte;
+    ReqPath: dword;
+end;
 
-type
-  conID = array[0..3] of byte;
+type
+  conID = array[0..3] of byte;
 
-type
-  PFwdOpenReq = ^FwdOpenReq;   //for Slc500 message
-  FwdOpenReq = packed record
-    Priority: byte;
-    TOTicks: byte;
-    OTConID: conID;
-    TOConID: conID;
-    ConSN: word;
-    VendID: word;
-    OriginSN: dword;
-    Reserve0: byte;
-    Reserve1: byte;
-    Reserv2: byte;
-    OT_RPI: conID;
-    OT_ConParams: word;
-    TO_RPI: conID;
-    TO_ConParams: word;
-    TransTrigger: byte;
-    ConPathSize: byte;
-    MsgRoutPath: dword;
-end;
+type
+  PFwdOpenReq = ^FwdOpenReq;   //for Slc500 message
+  FwdOpenReq = packed record
+    Priority: byte;
+    TOTicks: byte;
+    OTConID: conID;
+    TOConID: conID;
+    ConSN: word;
+    VendID: word;
+    OriginSN: dword;
+    Reserve0: byte;
+    Reserve1: byte;
+    Reserv2: byte;
+    OT_RPI: conID;
+    OT_ConParams: word;
+    TO_RPI: conID;
+    TO_ConParams: word;
+    TransTrigger: byte;
+    ConPathSize: byte;
+    MsgRoutPath: dword;
+end;
 
-type
-  PFwdOpenResp = ^FwdOpenResp;   //for Slc500 message
-  FwdOpenResp = packed record
-    unknown: word;
-    OTConID: conID;
-    TOConID: conID;
-    ConSN: word;
-    VendID: word;
-    OriginSN: dword;
-    OT_API: conID;
-    TO_API: conID;
-    TO_ConParams: word;
-    reply: byte;
-    reserved: byte;
-end;
+type
+  PFwdOpenResp = ^FwdOpenResp;   //for Slc500 message
+  FwdOpenResp = packed record
+    unknown: word;
+    OTConID: conID;
+    TOConID: conID;
+    ConSN: word;
+    VendID: word;
+    OriginSN: dword;
+    OT_API: conID;
+    TO_API: conID;
+    TO_ConParams: word;
+    reply: byte;
+    reserved: byte;
+end;
 
-type
-  PFwdOpenRequest = ^PFwdOpenRequest;
-  FwdOpenRequest = record
-    IPHeader: EtherIP_Hdr;
-    OpenHdr:FwdOpenHdr;
-    OpenReq: FwdOpenReq;
-end;
+type
+  PFwdOpenRequest = ^FwdOpenRequest;
+  FwdOpenRequest = record
+    IPHeader: EtherIP_Hdr;
+    OpenHdr:FwdOpenHdr;
+    OpenReq: FwdOpenReq;
+end;
 
-type
-  PFwdOpenResponse = ^PFwdOpenResponse;
-  FwdOpenResponse = record
-    IPHeader: EtherIP_Hdr;
-    OpenHdr:FwdOpenHdr;
-    OpenRes: FwdOpenResp;
-end;
+type
+  PFwdOpenResponse = ^FwdOpenResponse;
+  FwdOpenResponse = record
+    IPHeader: EtherIP_Hdr;
+    OpenHdr:FwdOpenHdr;
+    OpenRes: FwdOpenResp;
+end;
 
-type
+type
   PAddress_Item=^Address_Item;
   Address_Item = packed record
     CSItemType_ID: word;  //Init to CPH_Null = $0000
@@ -359,7 +356,7 @@ type
     SubElement: byte;
     CSDData:array[0..CIPDATALEN] of byte;
 end;
-    
+
 type
   PData_Item=^Data_Item;
   Data_Item = packed record
@@ -379,7 +376,6 @@ type
    // Addr: word;      //unique to unprotected file read N9 or N7 SLC & Micro?
    // tag: word;       //unique to protected typed file read/write
    // data: array[0..63] of byte;
-
 end;
 
 type PtrCIP = ^CIP;
@@ -390,7 +386,6 @@ type PtrCIP = ^CIP;
     PAddress: Address_Item;
     PData: Data_Item;
 end;
-
 {struct sockaddr_in {
         short   sin_family;
         u_short sin_port;
@@ -411,7 +406,7 @@ type
     tag:        Byte;
 end;
 
-type  //Keep this data for individual PLC connections
+type  //Keep this data for individual PLC connections   -  see CIP encapsulation packet header -
   PPLC_EtherIP_info = ^PLC_EtherIP_info;
   PLC_EtherIP_info = packed record
     EIP_Command: word;
@@ -419,7 +414,7 @@ type  //Keep this data for individual PLC connections
     session_handle: cardinal;
     EIP_status: cardinal;
     EIP_context: array[0..7] of byte;
-    Options: cardinal;
+    Options: cardinal;                   // tail of an encapsulation header
     PCIP: CIP;
     sock_handle: Integer;
     PLCHostIP: string;
@@ -471,9 +466,7 @@ type
     status: dword;
     custom: array[0..15] of byte;
     df1_data1: array[0..245] of byte;
-
 end;
-
 
 type
   custom_connect = record
@@ -481,7 +474,6 @@ type
     backlog: SmallInt;
     junk: array[0..11] of byte;
 end;
-
 
 type
    PFileData = ^FileData;
@@ -497,7 +489,6 @@ type
      floatdata: Byte;
      data: array[0..23] of Byte;
 end;
-
 
 implementation
 
@@ -549,7 +540,6 @@ char *errors[] = {
 	"Not Used 1",
 	"Not Used 2",
 	"Extended error data received"};
-
 char *plc_id[] = {
 	"1785 - L40B (PLC5/40 ) ",
 	"1785 - LT4  (PLC5/10 ) ",
@@ -565,10 +555,8 @@ char *plc_id[] = {
 	"1785 - L80E (PLC5/80E) ",
 	"1785 - xxxx (SoftLogix PLC)"};
 int id_count=17;
-
 int plc_index[] = 	{0x15, 0x22, 0x23, 0x28, 0x29, 0x31, 0x32, 0x33,
 			 0x4a, 0x4b, 0x55, 0x59, 0x7b};
-
 char *ext_errors[] = {
 	"No Error",
 	"A field has an illegal value",
@@ -606,7 +594,6 @@ char *ext_errors[] = {
 	"Data table element protection violation",
 	"Temporary internal problem"};
 
-
 char *datatypes[] = 	{"bit",
 			"bit string",
 			"byte string",
@@ -623,7 +610,6 @@ char *datatypes[] = 	{"bit",
 			"not defined - 14",
 			"address data",
 			"BCD"};
-
 char *addrtypes[] = 	{"O",	//Output
 			"I",	//Input
 			"S",	//Status
@@ -650,6 +636,5 @@ char *addrtypes[] = 	{"O",	//Output
 			"XC",	//Section 5 File
 			"XD",	//Section 6 File
 			"FF"};	// Force File Section
-
 
 

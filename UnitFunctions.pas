@@ -96,20 +96,16 @@ begin
    result:=result+IntToStr(ord(IPAddrList[IDX]));
 end;
 
-procedure RandContext(Plc:PPLC_EtherIP_info);
-var
-I1,I2: Integer;
+procedure RandContext(Plc :PPLC_EtherIP_info);
 begin
-  I1:=trunc(Random(65536));
-  I2:=trunc(Random(65536));
-  Plc^.EIP_context[0]:=I1 and $000F;
-  Plc^.EIP_context[1]:=I1 and $00F0;
-  Plc^.EIP_context[2]:=I1 and $0F00;
-  Plc^.EIP_context[3]:=I1 and $F000;
-  Plc^.EIP_context[4]:=I2 and $000F;
-  Plc^.EIP_context[5]:=I2 and $00F0;
-  Plc^.EIP_context[6]:=I2 and $0F00;
-  Plc^.EIP_context[7]:=I2 and $F000;
+  Plc^.EIP_context[0] := trunc(Random(127));
+  Plc^.EIP_context[1] := trunc(Random(127));
+  Plc^.EIP_context[2] := trunc(Random(127));
+  Plc^.EIP_context[3] := trunc(Random(127));
+  Plc^.EIP_context[4] := trunc(Random(127));
+  Plc^.EIP_context[5] := trunc(Random(127));
+  Plc^.EIP_context[6] := trunc(Random(127));
+  Plc^.EIP_context[7] := trunc(Random(127));
 end;
 
 function RandID:conID;
@@ -182,7 +178,7 @@ var
   WSAData: TWSAData;
   len, place, response_len: Integer;
   WSAERR: String;
-  BPtr: PChar;
+  BPtr: PAnsiChar;
   IDX: Integer;
 
   HostNme: String;
@@ -207,7 +203,7 @@ begin
 
     error:=0;
     HostNme:=PLCPtr.PLCHostIP;   //PLC IP address
-    HostInfo:=getHostByName(PChar(PLCPtr^.PLCHostIP));
+    HostInfo:=getHostByName(PAnsiChar(PLCPtr^.PLCHostIP));
   If not assigned(HostInfo) then
     begin
       error:=NOHOST;
@@ -221,30 +217,26 @@ begin
     	error:=NOCONNECT;
       exit;
     end;
-
   address.sin_family := AF_INET;       //family
   BPtr:=HostInfo.h_addr^;
-  address.sin_addr.S_un_b.s_b1 := char(BPtr^);
+  address.sin_addr.S_un_b.s_b1 := AnsiChar(BPtr^);
   inc(BPtr);
-  address.sin_addr.S_un_b.s_b2 := char(BPtr^);
+  address.sin_addr.S_un_b.s_b2 := AnsiChar(BPtr^);
   inc(BPtr);
-  address.sin_addr.S_un_b.s_b3 := char(BPtr^);
+  address.sin_addr.S_un_b.s_b3 := AnsiChar(BPtr^);
   inc(BPtr);
-  address.sin_addr.S_un_b.s_b4 := char(BPtr^);
-
+  address.sin_addr.S_un_b.s_b4 := AnsiChar(BPtr^);
   if (address.sin_addr.s_addr = 0) then
     begin
       error:=BADADDR;
       exit;
     end;
-
   address.sin_port := htons(PLCPtr^.PLCHostPort);
 //   address.sin_port := htons(2222);
   len := sizeof(address);
  // connect to an IP address - windows API
  //syn, syn/ack, ack  - computer - plc - computer
   IDX:= connect(PLCPtr^.sock_handle, address, len);
-
   if  IDX <0 then
     begin
       ERROR:=WSAGetLastError;
@@ -253,18 +245,15 @@ begin
     	error:=NOCONNECT;
       exit;
     end;
-
    error:=OK;
    place:=0;
    bzero(Addr(custom), sizeof(custom_connect));
    bzero(Addr(rcvd), sizeof(ethernet_header));
    bzero(Addr(header), sizeof(ethernet_header));
-
    header.mode := 1;
    header.submode := CONNECT_CMD;
    header.conn := 0;
    header.pccc_length := 0;
-
    custom.version := htons(PCCC_VERSION);
    custom.backlog := htons(PCCC_BACKLOG);
    StructToByteArray(header.custom,Addr(custom),_CUSTOM_LEN,0);
@@ -334,23 +323,20 @@ begin
      end;
 
 
-  insertByte(PLCPtr,OPEN_FNC,offset,ETH_IPLen);
-  insertByte(PLCPtr,READ_WRITE,offset,ETH_IPLen);
-  insertByte(PLCPtr,FileLo,offset,ETH_IPLen);
-  insertByte(PLCPtr,FileHi,offset,ETH_IPLen);
-  insertByte(PLCPtr,FileType,offset,ETH_IPLen);
-
-  IDX:=StructToByteArray(aBuffer,PLCPtr,24,0);
-  IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP,8,IDX);
+  insertByte(PLCPtr, OPEN_FNC, offset,ETH_IPLen);
+  insertByte(PLCPtr, READ_WRITE, offset,ETH_IPLen);
+  insertByte(PLCPtr, FileLo, offset, ETH_IPLen);
+  insertByte(PLCPtr, FileHi, offset, ETH_IPLen);
+  insertByte(PLCPtr, FileType, offset, ETH_IPLen);
+  IDX:=StructToByteArray(aBuffer, PLCPtr, 24, 0);
+  IDX:=StructToByteArray(aBuffer, @PLCPtr.PCIP, 8, IDX);
   if PLCPtr^.PCIP.ItemCnt > 0 then
-    IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PAddress,PLCPtr^.PCIP.PAddress.DataLen+4,IDX);
+    IDX:=StructToByteArray(aBuffer, @PLCPtr.PCIP.PAddress, PLCPtr^.PCIP.PAddress.DataLen+4, IDX);
   if PLCPtr^.PCIP.ItemCnt > 1 then
-    IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen+4,IDX);
-
+    IDX:=StructToByteArray(aBuffer, @PLCPtr.PCIP.PData, PLCPtr^.PCIP.PData.DataLen+4, IDX);
   send(PLCPtr^.Sock_handle, aBuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
-  Result:=emptyBuffer(PLCPtr,rBuffer);
+  Result:=emptyBuffer(PLCPtr, rBuffer);
   if result.answer[1] = OK then
     begin
       TagLo:=result.answer[4];
@@ -377,11 +363,11 @@ begin
   ETH_IPLen:=0;
  // PtrInfo:=PlcList[PlcNo];
   BZero(@aBuffer,sizeOf(aBuffer));
-  BZero(@PLCPtr^.PCIP.PAddress.ItemData,CIPADDLEN);
-  BZero(@PLCPtr^.PCIP.PData.ItemData,CIPDATALEN);
+  BZero(@PLCPtr^.PCIP.PAddress.ItemData, CIPADDLEN);
+  BZero(@PLCPtr^.PCIP.PData.ItemData, CIPDATALEN);
   IPAdd:=PLCPtr^.PLChostIP;
-  AddDataLen:=Fill_CS_Address(PLCPtr,STATTYPE,IPAdd,ETH_IPLen);
-  DataDataLen:=Fill_CS_Data(PLCPtr,FLSTATUS,FLSTATUS,ETH_IPLen);   //Length of data to eventually include in buff
+  AddDataLen:=Fill_CS_Address(PLCPtr, STATTYPE,IPAdd, ETH_IPLen);
+  DataDataLen:=Fill_CS_Data(PLCPtr, FLSTATUS, FLSTATUS, ETH_IPLen);   //Length of data to eventually include in buff
   offset:=DataDataLen;
   with PLCPtr^ do
     begin
@@ -395,7 +381,7 @@ begin
   send(PLCPtr^.Sock_handle, aBuffer, Ln,0);
 
   RbuffLen := recv(PLCPtr^.sock_handle, Rbuffer, SizeOf(Rbuffer), 0);
-  Result:=emptyBuffer(PLCPtr,RBuffer);
+  Result:=emptyBuffer(PLCPtr, RBuffer);
 end;
 
 function ProtFileRead(PLCPtr:PPLC_EtherIP_info; size: byte;fOffset: word):PCCCReply;
@@ -417,11 +403,11 @@ begin
    Word2Net(Tag,TagLo,TagHi);
    Word2Net(fOffset,offsetLo,offsetHi);
 
-   BZero(@rBuffer,sizeOf(rBuffer));
-   BZero(@PLCPtr^.PCIP.PAddress.ItemData,CIPADDLEN);
-   BZero(@PLCPtr^.PCIP.PData.ItemData,CIPDATALEN);
-   AddDataLen:=Fill_CS_Address(PLCPtr,RRADDTYPE,IPADDUNPROT,ETH_IPLen);
-   DataDataLen:=Fill_CS_Data(PLCPtr,UNPROTECTED,OPEN_CMD,ETH_IPLen);   //Length of data to eventually include in buff
+   BZero(@rBuffer, sizeOf(rBuffer));
+   BZero(@PLCPtr^.PCIP.PAddress.ItemData, CIPADDLEN);
+   BZero(@PLCPtr^.PCIP.PData.ItemData, CIPDATALEN);
+   AddDataLen:=Fill_CS_Address(PLCPtr, RRADDTYPE, IPADDUNPROT, ETH_IPLen);
+   DataDataLen:=Fill_CS_Data(PLCPtr, UNPROTECTED, OPEN_CMD, ETH_IPLen);   //Length of data to eventually include in buff
    offset:=DataDataLen;
 
    with PLCPtr^ do
@@ -431,26 +417,23 @@ begin
        CIP_Len:=AddDataLen+DataDataLen+16;
 //       PCIP.PData.cmd:= UWRITE_CMD;
      end;
-  insertByte(PLCPtr,PREAD_FILE_FNC,offset,ETH_IPLen);
-  insertByte(PLCPtr,size,offset,ETH_IPLen);
-  insertByte(PLCPtr,tagLo,offset,ETH_IPLen);
-  insertByte(PLCPtr,tagHi,offset,ETH_IPLen);
-  insertByte(PLCPtr,offsetLo,offset,ETH_IPLen);
-  insertByte(PLCPtr,offsetHi,offset,ETH_IPLen);
-  insertByte(PLCPtr,fileType,offset,ETH_IPLen);
-
+  insertByte(PLCPtr, PREAD_FILE_FNC, offset, ETH_IPLen);
+  insertByte(PLCPtr, size, offset, ETH_IPLen);
+  insertByte(PLCPtr, tagLo, offset, ETH_IPLen);
+  insertByte(PLCPtr, tagHi, offset, ETH_IPLen);
+  insertByte(PLCPtr, offsetLo, offset, ETH_IPLen);
+  insertByte(PLCPtr, offsetHi, offset, ETH_IPLen);
+  insertByte(PLCPtr, fileType, offset, ETH_IPLen);
   PLCPtr^.PCIP.PData.DataLen:= PLCPtr^.PCIP.PData.DataLen; // add data count
   IDX:=StructToByteArray(rBuffer,PLCPtr,24,0);
   IDX:=StructToByteArray(rBuffer,@PLCPtr.PCIP,8,IDX);
   if PLCPtr^.PCIP.ItemCnt > 0 then
-    IDX:=StructToByteArray(rBuffer,@PLCPtr.PCIP.PAddress,PLCPtr^.PCIP.PAddress.DataLen+4,IDX);
+    IDX:=StructToByteArray(rBuffer, @PLCPtr.PCIP.PAddress, PLCPtr^.PCIP.PAddress.DataLen+4, IDX);
   if PLCPtr^.PCIP.ItemCnt > 1 then
-    IDX:=StructToByteArray(rBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen+4,IDX);
-
+    IDX:=StructToByteArray(rBuffer, @PLCPtr.PCIP.PData, PLCPtr^.PCIP.PData.DataLen+4, IDX);
   send(PLCPtr^.Sock_handle, rBuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
-  Result:=emptyBuffer(PLCPtr,rBuffer);
+  Result:=emptyBuffer(PLCPtr, rBuffer);
 end;
 
 function ProtFileWrite(PLCPtr:PPLC_EtherIP_info; size: byte;fOffset: word;
@@ -471,14 +454,14 @@ begin
    Tag:=PLCPtr^.tag;
    fileType:=PLCPtr^.fType;
 
-   Word2Net(Tag,TagLo,TagHi);
-   Word2Net(fOffset,offsetLo,offsetHi);
+   Word2Net(Tag, TagLo, TagHi);
+   Word2Net(fOffset, offsetLo, offsetHi);
 
-   BZero(@rBuffer,sizeOf(rBuffer));
-   BZero(@PLCPtr^.PCIP.PAddress.ItemData,CIPADDLEN);
-   BZero(@PLCPtr^.PCIP.PData.ItemData,CIPDATALEN);
-   AddDataLen:=Fill_CS_Address(PLCPtr,RRADDTYPE,IPADDUNPROT,ETH_IPLen);
-   DataDataLen:=Fill_CS_Data(PLCPtr,UNPROTECTED,OPEN_CMD,ETH_IPLen);   //Length of data to eventually include in buff
+   BZero(@rBuffer, sizeOf(rBuffer));
+   BZero(@PLCPtr^.PCIP.PAddress.ItemData, CIPADDLEN);
+   BZero(@PLCPtr^.PCIP.PData.ItemData, CIPDATALEN);
+   AddDataLen:=Fill_CS_Address(PLCPtr, RRADDTYPE, IPADDUNPROT, ETH_IPLen);
+   DataDataLen:=Fill_CS_Data(PLCPtr, UNPROTECTED, OPEN_CMD, ETH_IPLen);   //Length of data to eventually include in buff
    offset:=DataDataLen;
 
    with PLCPtr^ do
@@ -496,22 +479,17 @@ begin
   insertByte(PLCPtr,offsetHi,offset,ETH_IPLen);
   insertByte(PLCPtr,fileType,offset,ETH_IPLen);
 
-
   ETH_IPLen:=ETH_IPLen+dataByteCnt;
   PLCPtr^.PCIP.PData.DataLen:= PLCPtr^.PCIP.PData.DataLen+dataByteCnt; // add data count
   IDX:=StructToByteArray(rBuffer,PLCPtr,24,0);
   IDX:=StructToByteArray(rBuffer,@PLCPtr.PCIP,8,IDX);
-
   if PLCPtr^.PCIP.ItemCnt > 0 then
     IDX:=StructToByteArray(rBuffer,@PLCPtr.PCIP.PAddress,PLCPtr^.PCIP.PAddress.DataLen+4,IDX);
   if PLCPtr^.PCIP.ItemCnt > 1 then
     IDX:=StructToByteArray(rBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen-DataByteCnt+4,IDX);
-
    If DataByteCnt > 0 then
      IDX:=StructToByteArray(rBuffer,@PDataBuf.Data,DataByteCnt,IDX);
-
   send(PLCPtr^.Sock_handle, rbuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
   Result:=emptyBuffer(PLCPtr,rBuffer);
 end;
@@ -549,16 +527,13 @@ begin
   insertByte(PLCPtr,CLOSE_FNC,offset,ETH_IPLen);
   insertByte(PLCPtr,TagLo,offset,ETH_IPLen);
   insertByte(PLCPtr,TagHi,offset,ETH_IPLen);
-
   IDX:=StructToByteArray(aBuffer,PLCPtr,24,0);
   IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP,8,IDX);
   if PLCPtr^.PCIP.ItemCnt > 0 then
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PAddress,PLCPtr^.PCIP.PAddress.DataLen+4,IDX);
   if PLCPtr^.PCIP.ItemCnt > 1 then
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen+4,IDX);
-
   send(PLCPtr^.Sock_handle, aBuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
   PLCPtr^.tag:=0;
   Result:=emptyBuffer(PLCPtr,rBuffer);
@@ -600,23 +575,19 @@ begin
   insertByte(PLCPtr,PLCFileData.element,offset,ETH_IPLen);
   insertByte(PLCPtr,PLCFileData.subElement,offset,ETH_IPLen);
   ETH_IPLen:=ETH_IPLen;
-
   with PLCPtr^ do
     begin
       EIP_Command := EIP_SendRRData;
       PCIP.ItemCnt:=2;
       CIP_Len:=ETH_IPLen-24;  //account for length of data buffer
     end;
-
   IDX:=StructToByteArray(aBuffer,PLCPtr,24,0);
   IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP,8,IDX);
   if PLCPtr^.PCIP.ItemCnt > 0 then
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PAddress,PLCPtr^.PCIP.PAddress.DataLen+4,IDX);
   if PLCPtr^.PCIP.ItemCnt > 1 then
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen+4,IDX);
-
   send(PLCPtr^.Sock_handle, aBuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
   Result:=emptyBuffer(PLCPtr,rBuffer);
 end;
@@ -663,14 +634,12 @@ begin
   insertByte(PLCPtr,PLCFileData.subElement,offset,ETH_IPLen);
   ETH_IPLen:=ETH_IPLen+dataByteCnt;
   PLCPtr^.PCIP.PData.DataLen:= PLCPtr^.PCIP.PData.DataLen+dataByteCnt; // add data count
-
   with PLCPtr^ do
     begin
       EIP_Command := EIP_SendRRData;
       PCIP.ItemCnt:=2;
       CIP_Len:=ETH_IPLen-24;  //account for length of data buffer
     end;
-
   IDX:=StructToByteArray(aBuffer,PLCPtr,24,0);
   IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP,8,IDX);
   if PLCPtr^.PCIP.ItemCnt > 0 then
@@ -679,9 +648,7 @@ begin
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen-DataByteCnt+4,IDX);
   If DataByteCnt > 0 then
      IDX:=StructToByteArray(aBuffer,@PSimpleData.Data,DataByteCnt,IDX);
-
   send(PLCPtr^.Sock_handle, aBuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
   Result:=emptyBuffer(PLCPtr,rBuffer);
 end;
@@ -735,7 +702,6 @@ begin
      IDX:=StructToByteArray(aBuffer,@PSimpleData.Data,DataByteCnt,IDX);
 
   send(PLCPtr^.Sock_handle, aBuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
   Result:=emptyBuffer(PLCPtr,rBuffer);
 end;
@@ -772,17 +738,13 @@ begin
   insertByte(PLCPtr,HighByte,offset,ETH_IPLen);
   insertByte(PLCPtr,Size,offset,ETH_IPLen);
   //insertByte(PLCPtr,size,offset,ETH_IPLen);
-
   IDX:=StructToByteArray(aBuffer,PLCPtr,24,0);
   IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP,8,IDX);
-
   if PLCPtr^.PCIP.ItemCnt > 0 then
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PAddress,PLCPtr^.PCIP.PAddress.DataLen+4,IDX);
   if PLCPtr^.PCIP.ItemCnt > 1 then
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen+4,IDX);
-
   send(PLCPtr^.Sock_handle, aBuffer, IDX,0);
-
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
   Result:=emptyBuffer(PLCPtr,rBuffer);
 end;
@@ -801,7 +763,6 @@ begin   }
   PCCC.DataSize:=7;
   result:=PCCC.DataSize; }
 //end;
-
 
 function senddata(buff: Pdata_buffer; ASocket: Integer):Integer;
 begin
@@ -827,8 +788,6 @@ begin
   else
     result:=Session;
 end;
-
-
 
 //*************************************************
 // Get a session handle from the PLC
@@ -874,7 +833,6 @@ var
   dispose(buff);
   dispose(receive_buffer);
 end;
-
 function unregister_session(PLCPtr:PPLC_EtherIP_info):Integer;
  var
   buff: Pdata_buffer;     //success = 0
@@ -993,14 +951,13 @@ begin
 end;
 
 
-
 function PLCConnect(PLCPtr: PPLC_EtherIP_info): String;
 var
   hostInfo: pHostEnt;
   address: TSockAddrIn;
   WSAData: TWSAData;
   results, len, IDX: Integer;
-  BPtr: PChar;
+  BPtr: PAnsiChar;
 begin
   PLCPtr.error:=OK;
   result:='No Errors';
@@ -1013,14 +970,13 @@ begin
         Exit;
       end;
   WSAStarted:=true;
-  HostInfo:=getHostByName(PChar(PLCPtr^.PLCHostIP));
+  HostInfo:=getHostByName(PAnsiChar(PLCPtr^.PLCHostIP));
   if not assigned(hostinfo) then
     begin
       PLCPtr^.Error := NOHOST;
       result:='No Host';
       Exit;
     end;
-
   PLCPtr^.sock_handle := socket(AF_INET, SOCK_STREAM, 0);
   if (PLCPtr^.sock_handle = NOCONNECT) then
     begin
@@ -1028,21 +984,17 @@ begin
       result:='Connect error';
       exit;
     end;
-
   PLCPtr^.PCIP.CipTimeout := CELL_DFLT_TIMEOUT;
-
   address.sin_family := AF_INET;       //family
   BPtr:=HostInfo.h_addr^;
-  address.sin_addr.S_un_b.s_b1 := char(BPtr^);
+  address.sin_addr.S_un_b.s_b1 := AnsiChar(BPtr^);
   inc(BPtr);
-  address.sin_addr.S_un_b.s_b2 := char(BPtr^);
+  address.sin_addr.S_un_b.s_b2 := AnsiChar(BPtr^);
   inc(BPtr);
-  address.sin_addr.S_un_b.s_b3 := char(BPtr^);
+  address.sin_addr.S_un_b.s_b3 := AnsiChar(BPtr^);
   inc(BPtr);
-  address.sin_addr.S_un_b.s_b4 := char(BPtr^);
-
+  address.sin_addr.S_un_b.s_b4 := AnsiChar(BPtr^);
   //address.sin_addr = *(struct in_addr *) *hostinfo->h_addr_list;
-
   if (address.sin_addr.s_addr = 0) then
     begin
       PLCPtr^.error:=BADADDR;
@@ -1053,7 +1005,6 @@ begin
   results:=0;
   len := sizeof(address);
   IDX:= connect(PLCPtr^.sock_handle, address, len);
-
   if (results < 0) then
     begin
       PLCPtr^.error:=NOCONNECT;
@@ -1061,7 +1012,6 @@ begin
       exit;
     end;
 end;
-
 function CommConnect(PLCPtr:PPLC_EtherIP_info):String;
 var
   ERR: String;
@@ -1085,7 +1035,6 @@ begin
   PLCDst:=Unregister_Session(PLCPtr);
   CloseSocket(PLCPtr^.sock_handle);
 end;
-
 function establish_connection(PLCPtr: PPLC_EtherIP_info; var error: string):Integer;
 var
   res1: Integer;
@@ -1114,10 +1063,9 @@ begin
     end;
 end;
 
-
 function GetIPFromHost(var HostName, IPaddr, WSAErr: string): Boolean;
 type
-  Name = array[0..100] of Char;
+  Name = array[0..100] of AnsiChar;
   PName = ^Name;
 var
   HEnt: pHostEnt;   //A windows structure host and address info
@@ -1152,7 +1100,6 @@ begin
   Dispose(HName);
   WSACleanup;
 end;
-
 procedure BZeero(PLCPtr: PPLC_EtherIP_info; aBuffer, rBuffer:array of byte);
 var
   Len: Integer;
@@ -1167,7 +1114,6 @@ begin
   bzero(_PCSData,SizeOf(Address_Item)+SizeOf(Data_Item)+2);
   bzero(PCCC, SizeOf(PCCC.data)+17);  }
 end;
-
 function  addBuffer(var aBuffer:array of byte;addBuf: PSimpleBuf;Len: Integer): integer;
 var
   IDX: Integer;
@@ -1179,19 +1125,15 @@ begin
     end;
   result:=Len+addBuf^.Cnt;
 end;
-
 function  fillBuffer(PLCPtr: PPLC_EtherIP_info; var aBuffer:array of byte;DtLen: Integer): Integer; //len
 var
   IDX: Integer;
 begin
  // APCCC:=PData.CSDataPtr.DataItem.ItemData;
-
   // Insert ethernet/IP data up to CIP
   IDX:=StructToByteArray(aBuffer,PLCPtr,24,0);
-
   // Insert CIP (00 00 00 00)  & TimeOut
   IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP,8,IDX);
-
   //Insert Address item
   if PLCPtr^.PCIP.ItemCnt > 0 then
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PAddress,PLCPtr^.PCIP.PAddress.DataLen+4,IDX);
@@ -1200,7 +1142,6 @@ begin
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen+4,IDX);
   result:=IDX;
 end;
-
 
 procedure RegisterReply(Socket:TCustomWinSocket	;PBuf: PSimpleBuf; len: integer);
  var
@@ -1213,7 +1154,6 @@ procedure RegisterReply(Socket:TCustomWinSocket	;PBuf: PSimpleBuf; len: integer)
    PBuf.data[7]:=SessionHandle and $000F;
    Socket.SendBuf(PBuf.data,len);
 end;
-
 procedure RRReply(Socket:TCustomWinSocket	;PBuf: PSimpleBuf; len: integer);
  var
    IDX, Cnt: Integer;
@@ -1268,7 +1208,6 @@ begin
      dispose(PRBuf);
    end;    
 end;
-
 {
 procedure UnitDataReply(Socket:TCustomWinSocket	;PBuf: PSimpleBuf; len: integer);
  var
@@ -1286,45 +1225,35 @@ begin
      PRBuf.data[3]:=$00;
      for IDX:=4 to 27 do     //Through encaps header and IF handle
        PRBuf.data[IDX]:=PBuf.Data[IDX];
-
      PRBuf.Data[28]:=$00;   //Timeout
      PRBuf.Data[29]:=$00;
      Cnt:=30;
      for IDX:=30 to 35 do
         PRBuf.Data[IDX]:=PBuf.Data[IDX]; //Item cnt, Address typeID , len,
-
      PRBuf.data[36]:=NetworkConID[0];
      PRBuf.data[37]:=NetworkConID[1];
      PRBuf.data[38]:=NetworkConID[2];
      PRBuf.data[39]:=NetworkConID[3];
-
      PRBuf.Data[40]:=$B1;   //Connected address item
      PRBuf.Data[41]:=$00;
      Cnt:=40;
      PRBuf.Data[42]:=$12;   //Length
      PRBuf.Data[43]:=$00;
-
      PRBuf.Data[44]:=PBuf.Data[44];   //Sequence count
      PRBuf.Data[45]:=PBuf.Data[45];
-
      PRBuf.Data[46]:=$CC;   //Service request
      PRBuf.Data[47]:=$00;
      PRBuf.Data[48]:=$00;
      PRBuf.Data[49]:=$00;
    
-
      for IDX:=50 to 53 do
         PRBuf.Data[IDX]:=PBuf.Data[IDX+6];
-
      for IDX:=54 to 57 do
         PRBuf.Data[IDX]:=PBuf.Data[IDX-2];
-
      PRBuf.Data[58]:=$48;   //Who knows
      PRBuf.Data[59]:=$10;
-
      PRBuf.Data[60]:=PBuf.Data[62];   //Some kind of TNS
      PRBuf.Data[61]:=PBuf.Data[63];
-
     // for IDX:=12 to 18 do    //context
       // PRBuf.Data[IDX]:=$00;
      HiByte:=PBuf.Data[66];
@@ -1332,35 +1261,29 @@ begin
      With Form1 do
        begin
          Edit1.Text:= IntToStr(Net2Word(HiByte, LoByte));
-
          HiByte:=PBuf.Data[68];
          LoByte:=PBuf.Data[69];
          Ed12.Text := IntToStr(Net2Word(HiByte, LoByte));
-
          HiByte:=PBuf.Data[70];
          LoByte:=PBuf.Data[71];
          Ed13.Text := IntToStr(Net2Word(HiByte, LoByte));
-
          HiByte:=PBuf.Data[72];
          LoByte:=PBuf.Data[73];
          Ed14.Text := IntToStr(Net2Word(HiByte, LoByte));
-
          HiByte:=PBuf.Data[74];
          LoByte:=PBuf.Data[75];
          Ed15.Text := IntToStr(Net2Word(HiByte, LoByte));
-
          HiByte:=PBuf.Data[76];
          LoByte:=PBuf.Data[77];
          Ed16.Text := IntToStr(Net2Word(HiByte, LoByte));
       end;
-
      Socket.SendBuf(PRBuf.Data,62);
    finally
      dispose(PRBuf);
    end;    
 end;
- }
 
+ }
 function getCommand(rBuffer: array of byte): word;
 var
   IDX: Integer;
@@ -1372,7 +1295,7 @@ end;
 //************************************************************
 // Record errors here
 //************************************************************
-function  emptyBuffer(PLCPtr: PPLC_EtherIP_info; var rBuffer:array of byte): PCCCReply; //len
+function  emptyBuffer(PLCPtr: PPLC_EtherIP_info; var rBuffer: array of byte): PCCCReply; //len
 var
   IDX,I: Integer;
   AItem: Address_Item;
@@ -1387,7 +1310,6 @@ begin
   // Extract encapsulation header
   IDX:=ByteArrayToStruct(@PHead,rBuffer,24,0); //Cmd through options
 
-
   // Extract Encapsulation data.Handle & data.TimeOut
   IDX:=ByteArrayToStruct(@PData,rBuffer,6,IDX);
   // Extract CSData packet.ItemCount
@@ -1396,29 +1318,24 @@ begin
   IDX:=ByteArrayToStruct(@AItem,rBuffer,4,IDX);
   // Extract CSData packet.AddressItem.Data
   IDX:=ByteArrayToStruct(@AItem.ItemData,rBuffer, AItem.DataLen,IDX);
-
    // Extract CSData packet.DataItem.type and length = 4 bytes
   IDX:=ByteArrayToStruct(@DItem,rBuffer,4,IDX);
-
   AnswerLen:=DItem.DataLen;
   result.len:=AnswerLen;
   // Extract data from PLC
   for I:=0 to AnswerLen-1 do
     result.answer[I]:=rBuffer[IDX+I];
-
-  if (PHead.EIP_status<>0) then
+  if (PHead.EIP_status <> 0) then
      result.Error:=STATUSERROR
-  else if (PHead.session_handle<>PLCPtr^.session_handle) then
+  else if (PHead.session_handle <> PLCPtr^.session_handle) then
       result.error:= NOSESSIONMATCH
-  else if contextCompare(PHead.Context, PLCPtr^.EIP_context,8) <> 0  then
+  else if contextCompare(PHead.Context, PLCPtr^.EIP_context, 8) <> 0  then
      result.Error:=NOCONTEXTMATCH
-  else if addressCompare(AItem.ItemData,PLCPtr^.PCIP.PAddress.ItemData,16) <> 0 then
+  else if addressCompare(AItem.ItemData, PLCPtr^.PCIP.PAddress.ItemData, 16) <> 0 then
     result.Error:=NOADDRESSMATCH;
-
   result.CIPError:=Result.error;
   result.Status:= result.answer[1];
  end;
-
 function  getPosInteger(S: String): Integer;
 var
   IDX: Integer;
@@ -1429,7 +1346,6 @@ begin
       exit;
   result:=StrToInt(S);
 end;
-
 function toByte(S: ByteStr): Byte;
 var
   IDX: Integer;
@@ -1439,7 +1355,6 @@ begin
     if S[IDX+1] = '1' then
       result:=result+PwrTwo(3-IDX);
 end;
-
 function parseStatus(PCCC: PCCCReply;
            var Series,Revision,PLCName: String):Boolean;
 var
@@ -1461,12 +1376,9 @@ begin
         Revision:=chr((SerRev and 15)+64);
         for IDX := 9 to 16 do
           PLCName:=PLCName+chr(Answer[IDX]);
-
       end;
 end;
-
 end.
-
 
 
 

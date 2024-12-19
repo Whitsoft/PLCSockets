@@ -138,9 +138,9 @@ procedure TPLCTypedFile.ClearArrays;
 var
   IDX: Integer;
 begin
-   for IDX:=0 to MAXFILEARRAY do
-     begin
-       ffromFile[IDX]:=0;
+   for IDX:=0 to MAXWORDS - 1 do        // MAXFILEARRAY = 120   MAXWORDS = 24
+     begin                              // PLCFileArray = array [0..MAXWORDS-1] of word;
+       ffromFile[IDX]:=0;                  // ffromFile is type PCLFileArray
        ftoFile[IDX]:=0;
      end;
 end;
@@ -294,15 +294,15 @@ begin
   for IDX := 0 to Cnt  do
     try
       if FType = 'N' then
-         Word2Net(fToFile[IDX],LoByte,HiByte)
+         Word2Net(fToFile[IDX], LoByte, HiByte)
       else if FType ='B' then
-         Word2Net(fToBit[IDX],LoByte,HiByte)
+         Word2Net(fToBit[IDX], LoByte, HiByte)
       else if FType ='T' then
-         Word2Net(fToTimer[IDX],LoByte,HiByte)
+         Word2Net(fToTimer[IDX], LoByte, HiByte)
       else if FType ='C' then
-         Word2Net(fToCounter[IDX],LoByte,HiByte);
-      PSimpleData.data[2*IDX]:=LoByte;
-      PSimpleData.data[2*IDX+1]:=HiByte;
+         Word2Net(fToCounter[IDX], LoByte, HiByte);
+      PSimpleData.data[2*IDX]   := LoByte;
+      PSimpleData.data[2*IDX+1] := HiByte;
     except
       dispose(PSimpleData);
       result:=false;
@@ -312,7 +312,7 @@ begin
   PSimpleData.Cnt:=Cnt*2;
   size:=PSimpleData.Cnt;
 
-  reply:=ProtFileWrite(EtherInfo,size,Offset,PSimpleData);
+  reply:=ProtFileWrite(EtherInfo, size, Offset, PSimpleData);
  // ProtFileClose(EtherInfo);
   dispose(PSimpleData);
   result:=intToBool(Reply.Status);
@@ -349,12 +349,12 @@ begin
       begin
         HiByte:=answer[4+IDX*4];
         LoByte:=answer[5+IDX*4];
-        LoWord:=net2Word(HiByte,LoByte);
+        LoWord:=net2Word(HiByte, LoByte);
         HiByte:=answer[6+IDX*4];
         LoByte:=answer[7+IDX*4];
-        HiWord:=net2Word(HiByte,LoByte);
-        fFromFloat[IDX].LoWord:=LoWord;
-        fFromFloat[IDX].HiWord:=HiWord;
+        HiWord:=net2Word(HiByte, LoByte);
+        fFromFloat[IDX].LoWord:= LoWord;
+        fFromFloat[IDX].HiWord:= HiWord;
       end;
   result:=intToBool(Reply.Status);
 
@@ -371,15 +371,15 @@ begin
   if not PRFileOpen then exit;
   TimeoutEnabled:=false; 
   new(PSimpleData);
-  BZero(PSimpleData,MAXFILEARRAY*2);
+  BZero(PSimpleData, MAXFILEARRAY*2);
   Cnt:=nWords;
-  if Cnt > MAXWORDS then Cnt :=MAXWORDS;
+  if Cnt > MAXWORDS then Cnt := MAXWORDS;
   for IDX := 0 to Cnt -1 do
     try
-      Word2Net(fToFloat[IDX].HiWord,LoByte,HiByte);
+      Word2Net(fToFloat[IDX].HiWord, LoByte, HiByte);
       PSimpleData.data[4*IDX]:=LoByte;
       PSimpleData.data[4*IDX+1]:=HiByte;
-      Word2Net(fToFloat[IDX].LoWord,LoByte,HiByte);
+      Word2Net(fToFloat[IDX].LoWord, LoByte, HiByte);
       PSimpleData.data[4*IDX+2]:=LoByte;
       PSimpleData.data[4*IDX+3]:=HiByte;
     except
@@ -399,7 +399,7 @@ begin
         TimeoutEnabled:=true;
         exit;
       end;
-  reply:=ProtFileWrite(EtherInfo,size,Offset,PSimpleData);
+  reply:=ProtFileWrite(EtherInfo, size, Offset, PSimpleData);
   dispose(PSimpleData);
   result:=intToBool(Reply.Status);
 end;

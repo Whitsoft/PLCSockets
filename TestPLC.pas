@@ -316,9 +316,11 @@ procedure TForm1.BtnWriteProtClick(Sender: TObject);
 var
   written: Boolean;
   FType: char;
-  IDX,Ln, offset: word;
+  IDX, Ln, offset: word;
 begin
   //format data from MemoIn
+  if MemoIn.Lines.Count <= 0 then
+    exit;
   Ln:=MemoIn.Lines.Count -1;
   With PLCTypedFile1 do
     begin
@@ -349,7 +351,7 @@ begin
       else
          written:=TypedFileWrite(Ln, Offset, FType);
       if not written then
-        ShowMEssage('File may not have been opened.');   
+        ShowMessage('File may not have been opened.');
    end;
 end;
 

@@ -97,13 +97,13 @@ end; }
 
 procedure TPLCCIF.putWord(IDX: Integer; Value: word);
 begin
-  if IDX <=MAXFILEARRAY then
+  if IDX <= MAXFILEARRAY then
      fToWords[IDX]:=value;
 end;
 
 function TPLCCIF.getWord(IDX: Integer): word;
 begin
-  if IDX <=MAXFILEARRAY then
+  if IDX <= MAXFILEARRAY then
      result:=fFromWords[IDX]
   else
      result:=0;   
@@ -123,7 +123,7 @@ begin
    PLCPtr:=EtherInfo;
 
    words:=nWords;
-   if (words*2) > MAXFILEARRAY*2 then words:=MAXFILEARRAY*2 ;
+   if (words*2) > MAXFILEARRAY * 2 then words := MAXFILEARRAY * 2 ;
 
    if not Connected then
     Connect;
@@ -135,14 +135,14 @@ begin
       exit;
     end;
    Size:=Words*2;
-   Reply:=CIFRead(PLCPtr,size,Offset);
+   Reply:=CIFRead(PLCPtr, size, Offset);
    Ln:=Reply.Len div 2 -3;
    With Reply do
      for IDX := 0 to Ln do
        begin
-         HiByte:=answer[4+IDX*2];
-         LoByte:=answer[5+IDX*2];
-         fFromWords[IDX]:=net2Word(HiByte,LoByte);
+         HiByte := answer[4+IDX*2];
+         LoByte := answer[5+IDX*2];
+         fFromWords[IDX] := net2Word(HiByte, LoByte);
        end;
    CommDiscon(PLCPtr);
    result:=intToBool(Reply.Status);
@@ -164,14 +164,14 @@ begin
       
   PLCPtr:=EtherInfo;
   new(PSimpleData);
-  BZero(PSimpleData,MAXFILEARRAY*2);
+  BZero(PSimpleData, MAXFILEARRAY * 2);
   words:=nWords;
-  if (words*2) > MAXFILEARRAY*2 then words:=MAXFILEARRAY*2 ;
+  if (words*2) > MAXFILEARRAY * 2 then words:=MAXFILEARRAY * 2 ;
   for IDX := 0 to words -1 do
     try
-      Word2Net(fToWords[IDX],LoByte,HiByte);
-      PSimpleData.data[2*IDX]:=LoByte;
-      PSimpleData.data[2*IDX+1]:=HiByte;
+      Word2Net(fToWords[IDX],LoByte, HiByte);
+      PSimpleData.data[2 * IDX]:=LoByte;
+      PSimpleData.data[2 * IDX+1]:=HiByte;
     except
       dispose(PSimpleData);
       result:=false;
@@ -190,7 +190,7 @@ begin
     end;
 
 
-  Reply:=CIFWrite(PLCPtr,Size,Offset,PSimpleData);
+  Reply:=CIFWrite(PLCPtr, Size, Offset, PSimpleData);
   TimeoutEnabled:=true;
   dispose(PSimpleData);
   result:=intToBool(Reply.Status);

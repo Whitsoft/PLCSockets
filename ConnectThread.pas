@@ -42,7 +42,7 @@ var
   WSAData: TWSAData;
   len, response_len, IntIP: Integer;
   WSAERR: String;
-  BPtr: PChar;
+  BPtr: PAnsiChar;
   IDX: Integer;
   HostNme: String;
   error: Integer;
@@ -71,7 +71,7 @@ begin
 
     error:=0;
     HostNme:=PLCPtr.PLCHostIP;   //PLC IP address
-    HostInfo:=getHostByName(PChar(PLCPtr^.PLCHostIP));
+    HostInfo:=getHostByName(PAnsiChar(PLCPtr^.PLCHostIP));
   If not assigned(HostInfo) then
      error:=NOHOST
   else
@@ -84,13 +84,13 @@ begin
         begin
           address.sin_family := AF_INET;       //family
           BPtr:=HostInfo.h_addr^;
-          address.sin_addr.S_un_b.s_b1 := char(BPtr^);
+          address.sin_addr.S_un_b.s_b1 := AnsiChar(BPtr^);
           inc(BPtr);
-          address.sin_addr.S_un_b.s_b2 := char(BPtr^);
+          address.sin_addr.S_un_b.s_b2 := AnsiChar(BPtr^);
           inc(BPtr);
-          address.sin_addr.S_un_b.s_b3 := char(BPtr^);
+          address.sin_addr.S_un_b.s_b3 := AnsiChar(BPtr^);
           inc(BPtr);
-          address.sin_addr.S_un_b.s_b4 := char(BPtr^);
+          address.sin_addr.S_un_b.s_b4 := AnsiChar(BPtr^);
 
           if (address.sin_addr.s_addr = 0) then
              PLCPtr^.error:=BADADDR
