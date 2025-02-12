@@ -18,6 +18,7 @@ procedure memcpy(dataPtr,buffPtr: Pointer; len: integer);
 procedure Word2Net(Data: Word; var LoByte: byte; var HiByte: Byte);
 function  Net2Word(HiByte, LoByte: Byte):word;
 
+function  Net2Integer(Byte0,Byte1,Byte2,Byte3: byte):Integer;
 function  Net2Cardinal(Byte0,Byte1,Byte2,Byte3: byte):cardinal;
 procedure Cardinal2Net(data: cardinal;var Byte0: Byte;
                        var Byte1: Byte;var Byte2: Byte;var Byte3: Byte);
@@ -86,6 +87,11 @@ begin
   HiWord:=Data div   $10000;
   Word2Net(HiWord,Bytes[1],Bytes[0]);
   Word2Net(LoWord,Bytes[3],Bytes[2]);
+end;
+
+function  Net2Integer(Byte0,Byte1,Byte2,Byte3: byte):Integer;
+begin
+  result:=Byte3*16777216+Byte2*65536+Byte1*256+Byte0;
 end;
 
 function  Net2Cardinal(Byte0,Byte1,Byte2,Byte3: byte):cardinal;

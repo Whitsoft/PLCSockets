@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ComCtrls, PLCLogical, PLCConnectClass,
+  Dialogs, StdCtrls, ComCtrls, PLCLogical, PLCConnectClass, Winsock2, System.Net.Socket,
   PLCCIF, PLCTypedFile, ExtCtrls, ScktComp, PLCMsg, BinDecConv, UnitH;
 
 type
@@ -101,8 +101,6 @@ implementation
 
 {$R *.dfm}
 
-
-
 procedure TForm1.UDUnProtMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
@@ -184,7 +182,7 @@ begin
   MemoOut.Clear;
   With PLCLogical1 do
     begin  //Get data from PLC
-      Sing:=getFloat(IDX);
+ //     Sing:=getFloat(IDX);
       Ln:=StrToInt(EdProtLen.Text);
       TimeOut:=5000;
       PLCElement:=upperCase(EdInput.Text);
@@ -216,11 +214,6 @@ begin
         end;
      end; // With PLCLogical1
 end;
-
-
-
-
-
 
 procedure TForm1.BtnUnProtReadClick(Sender: TObject);
 var
@@ -267,6 +260,7 @@ var
   IDX, Ln, Offst: word;
 begin
   Ln:=StrToInt(EdFileLen.text);
+
   MemoIn.Clear;
   Offst:= StrToInt(edFileOff.Text);
   MemoOut.Clear;

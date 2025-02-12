@@ -3,7 +3,7 @@ unit PLCConnectClass;
 interface
 
 uses   
-  SysUtils, Classes, ScktComp,WinSock,types, UnitUtil, UnitFunctions,ExtCtrls,
+  SysUtils, Classes, ScktComp,WinSock2,types, UnitUtil, UnitFunctions,ExtCtrls,
                      FileStrToData, UnitH;
 
 type
@@ -217,6 +217,7 @@ end;
 
 function TPLCConnectClass.Connect:String;
 begin
+  ferror := '';
   if Connected then exit;
   Init;
   ferror:=CommConnect(EtherInfo);

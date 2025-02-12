@@ -66,7 +66,7 @@ uses
  function getStatus(PLCPtr:PPLC_EtherIP_info):PCCCReply;
  //function  getIPs(IPS: Tstrings): String;
 implementation
-
+ {$R-} {$RANGECHECKS OFF}
  const ByteSize: array[0..10] of byte = (0,0,0,$14,$48,$06,0,$3C,$04,0,0);
 
 var
@@ -170,8 +170,7 @@ type
   PName = ^Name;
 var
   hostInfo: pHostEnt;
-
-
+  InAddr: in_addr;
   address: TSockAddrIn;
   header, rcvd: ethernet_header;
   custom: custom_connect;
@@ -186,30 +185,31 @@ var
 begin
  result:='ERROR';
  PLCPtr^.connected:=NOCON;
-//struct hostent   -- from windows SDK
-//    char FAR *       h_name;  //name of host PC
-//    char FAR * FAR * h_aliases; //Null terminated string of alternate names
-//    short            h_addrtype; //Address type returned
-//    short            h_length;    //Lenght in bytes of each address
-//    char FAR * FAR * h_addr_list;  //null terminated list of IP addresses
-//;
-
-                                                 //At least Version 1 Rev 1
-      if WSAStartup($0101, WSAData) <> 0 then    //initialize Winsock library
-         begin
-           WSAErr := 'Winsock is not responding."';
-           Exit;
-         end;
+                                             //At least Version 1 Rev 1
+ if WSAStartup($0101, WSAData) <> 0 then    //initialize Winsock library
+    begin
+      WSAErr := 'Winsock is not responding."';
+      Exit;
+    end;
 
     error:=0;
     HostNme:=PLCPtr.PLCHostIP;   //PLC IP address
-    HostInfo:=getHostByName(PAnsiChar(PLCPtr^.PLCHostIP));
-  If not assigned(HostInfo) then
-    begin
-      error:=NOHOST;
-      exit;
-    end;
-   //create a socket - windows api function
+    {  in_addr = record
+    case Integer of
+      0: (S_un_b: SunB);
+      1: (S_un_c: SunC);
+      2: (S_un_w: SunW);
+      3: (S_addr: u_long);}
+
+ { type
+   sockaddr_in = record
+    sin_family: Smallint;
+    sin_port: u_short;
+    sin_addr: in_addr;
+    sin_zero: array [0..7] of a_char;
+  end;  }
+
+  // create a socket - windows api function
   PLCPtr^.sock_handle := socket(AF_INET, SOCK_STREAM, 0);
   if (PLCPtr^.sock_handle = -1) then
     begin
@@ -217,15 +217,10 @@ begin
     	error:=NOCONNECT;
       exit;
     end;
+  InAddr.S_addr := inet_addr(PAnsiChar(AnsiString(PLCPtr.PLCHostIP)));
   address.sin_family := AF_INET;       //family
-  BPtr:=HostInfo.h_addr^;
-  address.sin_addr.S_un_b.s_b1 := AnsiChar(BPtr^);
-  inc(BPtr);
-  address.sin_addr.S_un_b.s_b2 := AnsiChar(BPtr^);
-  inc(BPtr);
-  address.sin_addr.S_un_b.s_b3 := AnsiChar(BPtr^);
-  inc(BPtr);
-  address.sin_addr.S_un_b.s_b4 := AnsiChar(BPtr^);
+  address.sin_addr  := InAddr;
+
   if (address.sin_addr.s_addr = 0) then
     begin
       error:=BADADDR;
@@ -771,18 +766,23 @@ begin
 end;
 
 
-function readdata(pBuffer: Pdata_buffer; ASocket: Integer): Integer;
+function readdata(pBuffer: Pdata_buffer; ASocket: Integer): Cardinal;
 var
+err: Integer;
   byte0,byte1,byte2,byte3: byte;
-  Session: cardinal;
+  Session: Cardinal; //Integer;
 begin
   bzero(pBuffer, DATA_Buffer_Length);
   pBuffer.overall_len := recv(ASocket, pBuffer.data, DATA_Buffer_Length, 0);
-  Byte0:=pBuffer.data[4];Byte1:=pBuffer.data[5];Byte2:=pBuffer.data[6];Byte3:=pBuffer.data[7];
+ Err :=  WSAGetLastError();
+  Byte0:=pBuffer.data[4];
+  Byte1:=pBuffer.data[5];
+  Byte2:=pBuffer.data[6];
+  Byte3:=pBuffer.data[7];
   Session:=Net2Cardinal(Byte0,Byte1,Byte2,Byte3);
   if (pBuffer.overall_len < 1)  then
     begin
-      result:=-1;
+      result:=0;
       exit;
     end
   else
@@ -833,6 +833,7 @@ var
   dispose(buff);
   dispose(receive_buffer);
 end;
+
 function unregister_session(PLCPtr:PPLC_EtherIP_info):Integer;
  var
   buff: Pdata_buffer;     //success = 0
@@ -840,7 +841,7 @@ function unregister_session(PLCPtr:PPLC_EtherIP_info):Integer;
   ret: Integer;
   ASocket: Integer;
 begin
-  result:=-1;
+  result:=0;
   new(buff);
   new(receive_buffer);
 
@@ -1012,6 +1013,7 @@ begin
       exit;
     end;
 end;
+
 function CommConnect(PLCPtr:PPLC_EtherIP_info):String;
 var
   ERR: String;

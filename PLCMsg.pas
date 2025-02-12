@@ -4,7 +4,7 @@ interface
 
 uses
    SysUtils, Classes, ScktComp,types, ExtCtrls, PLCConnectClass,
-   UnitUtil,UnitH, UnitFunctions, FileStrToData, Winsock, dialogs;
+   UnitUtil, UnitH, UnitFunctions, FileStrToData, Winsock2, dialogs;
 
 const
   MAXWORDS=24;

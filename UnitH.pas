@@ -3,7 +3,7 @@ unit UnitH;
 interface
 uses
 
-Windows, Classes, WinSock;
+Windows, Classes, WinSock2;
 
 const
    PREFIX: array[0..15] of String = (' ', ' ', ' ', ' ', 'S',
@@ -417,7 +417,7 @@ type  //Keep this data for individual PLC connections   -  see CIP encapsulation
     Options: cardinal;                   // tail of an encapsulation header
     PCIP: CIP;
     sock_handle: Integer;
-    PLCHostIP: string;
+    PLCHostIP: AnsiString;
     PLCHostPort: word;
     error: Integer;
     tag: byte;
