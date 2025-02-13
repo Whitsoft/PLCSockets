@@ -713,7 +713,10 @@ var
    ETH_IPLen: Integer;
    LowByte, HighByte: byte;
    aBuffer, rBuffer: array[0..255] of byte;
+   Error: Integer;
+   ErrorMsg: String;
 begin
+  // SockHndl :=Integer(@PLCPtr^.sock_handle);
    ETH_IPLen:=32;
    BZero(@aBuffer,sizeOf(aBuffer));
    BZero(@PLCPtr^.PCIP.PAddress.ItemData,CIPADDLEN);
@@ -742,7 +745,14 @@ begin
     IDX:=StructToByteArray(aBuffer,@PLCPtr.PCIP.PData,PLCPtr^.PCIP.PData.DataLen+4,IDX);
   send(PLCPtr^.Sock_handle, aBuffer, IDX,0);
   RbuffLen := recv(PLCPtr^.sock_handle, rBuffer, SizeOf(rBuffer), 0);
-  Result:=emptyBuffer(PLCPtr,rBuffer);
+  if RBuffLen = SOCKET_ERROR then
+    begin
+     Error := WSAGetLastError();
+     ErrorMsg :=  examineError(Error);
+     ShowMessage(ErrorMsg);
+    end;
+  if RBuffLen > 0 then
+     result := emptyBuffer(PLCPtr,rBuffer)
 end;
 
 {function UnProtectedRead(PLCPtr:PPLC_EtherIP_info; addr: word;Count: Integer):Integer;
@@ -1336,9 +1346,10 @@ begin
      result.Error:=NOCONTEXTMATCH
   else if addressCompare(AItem.ItemData, PLCPtr^.PCIP.PAddress.ItemData, 16) <> 0 then
     result.Error:=NOADDRESSMATCH;
-  result.CIPError:=Result.error;
+  result.CIPError := Result.error;
   result.Status:= result.answer[1];
  end;
+
 function  getPosInteger(S: String): Integer;
 var
   IDX: Integer;

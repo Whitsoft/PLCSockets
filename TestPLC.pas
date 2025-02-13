@@ -65,6 +65,7 @@ type
     Label12: TLabel;
     Label13: TLabel;
     Label14: TLabel;
+    TimerBtn: TTimer;
     procedure UDUnProtMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure UDFileLenMouseUp(Sender: TObject; Button: TMouseButton;
@@ -87,7 +88,10 @@ type
     procedure BtnCloseClick(Sender: TObject);
     procedure Edit1Change(Sender: TObject);
     procedure Edit2Change(Sender: TObject);
+    procedure EnableButtons;
+    procedure DisableButtons;
     procedure PLCMsg1ClientRead(Sender: TObject; Socket: TCustomWinSocket);
+    procedure TimerBtnTimer(Sender: TObject);
   private
     { Private declarations }
   public
@@ -131,7 +135,37 @@ begin
    EdUnProt.Text:=IntToStr(UpDown1.position);
 end;
 
+procedure TForm1.TimerBtnTimer(Sender: TObject);
+begin
+   TimerBtn.Enabled := false;
+   EnableButtons;
+end;
 
+procedure TForm1.DisableButtons;
+begin
+  BtnReadProt .Enabled   := False;
+  BtnWriteProt.Enabled   := False;
+  BtnOpen.Enabled        := False;
+  BtnClose.Enabled       := False;
+  BtnWriteProt.Enabled   := False;
+  BtnUnProtRead.Enabled  := False;
+  BtnUnProtWrite.Enabled := False;
+  BtnLogRead.Enabled     := False;
+  BtnLogWrite.Enabled    := False;
+end;
+
+procedure TForm1.EnableButtons;
+begin
+  BtnReadProt .Enabled   := True;
+  BtnWriteProt.Enabled   := True;
+  BtnOpen.Enabled        := True;
+  BtnClose.Enabled       := True;
+  BtnWriteProt.Enabled   := True;
+  BtnUnProtRead.Enabled  := True;
+  BtnUnProtWrite.Enabled := True;
+  BtnLogRead.Enabled     := True;
+  BtnLogWrite.Enabled    := True;
+end;
 
 procedure TForm1.BtnLogWriteClick(Sender: TObject);
 var
@@ -220,6 +254,7 @@ var
   FileNo, nWords: Word;
   IDX, Ln: Integer;
 begin
+  DisableButtons;
   MemoOut.Clear;
   Ln:=StrToInt(EdCIFLen.Text)-1;
   With PLCCIF1 do
@@ -231,6 +266,7 @@ begin
       for IDX:=0 to Ln  do
         MemoOut.Lines.Add(IntToStr(PLCCIF1.getWord(IDX)));
     end;
+    TimerBtn.Enabled := true;
 end;
 
 procedure TForm1.BtnUnProtWriteClick(Sender: TObject);
@@ -238,6 +274,7 @@ var
   FAddress, nWords: Word;
   IDX, Ln: Integer;
 begin
+  DisableButtons;
   Ln:=MemoIn.Lines.Count-1;//Ln:=StrToInt(EdCIFLen.Text)-1;
   If Ln < 0 then exit;
   MemoOut.Clear;
@@ -250,6 +287,7 @@ begin
       TimeOut:=5000;
       WriteCIFFile(nWords, FAddress);
   end;
+  TimerBtn.Enabled := true;
 end;
 
 procedure TForm1.BtnReadProtClick(Sender: TObject);
@@ -406,6 +444,9 @@ begin
     end;
   EdRec.Text:=DataFileDesc;
 end;
+
+
+
 
 end.
 
