@@ -210,8 +210,9 @@ begin
   end;  }
 
   // create a socket - windows api function
+  // success returns a socket hande
   PLCPtr^.sock_handle := socket(AF_INET, SOCK_STREAM, 0);
-  if (PLCPtr^.sock_handle = -1) then
+  if (PLCPtr^.sock_handle = -1) then       //Socket function failure
     begin
       //ShowMessage('attach_socket error');
     	error:=NOCONNECT;
